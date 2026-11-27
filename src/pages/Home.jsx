@@ -4,6 +4,7 @@ import RsvpCard from '../components/RsvpCard.jsx';
 import SuccessAnimation from '../components/SuccessAnimation.jsx';
 import Countdown from '../components/Countdown.jsx';
 import GuestsButton from '../components/GuestsButton.jsx';
+import TitleLights from '../components/TitleLights.jsx';
 import { rsvp } from '../api.js';
 import { setMe } from '../me.js';
 
@@ -36,8 +37,9 @@ export default function Home({ attendees, onRegistered, navigate, onCancel }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.2, 0.8, 0.2, 1] }}
         >
-          <h1>
-            Božićni <span className="h1-accent">domjenak</span>
+          <h1 className="xmas-title">
+            <TitleLights />
+            <span className="xmas-title-text">Božićni domjenak</span>
           </h1>
           <div className="meta">
             <span className="chip chip-red">📅 Četvrtak, 10.12.</span>

@@ -2608,3 +2608,47 @@ h1 {
   .trip-title { font-size: 24px; }
   .picker-grid { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
 }
+
+/* ---------- naslov s lampicama ---------- */
+.home .xmas-title {
+  position: relative;
+  margin: -48px 0 clamp(30px, 5vh, 48px);
+  padding-top: 0.5em;
+  color: #fff;
+}
+.xmas-title-text {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  text-shadow:
+    0 2px 0 rgba(200, 225, 255, 0.55),
+    0 6px 26px rgba(10, 10, 50, 0.55),
+    0 0 40px rgba(255, 220, 140, 0.25);
+}
+.title-lights {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: -3%;
+  width: 106%;
+  height: auto;
+  overflow: visible;
+  pointer-events: none;
+}
+.tl-bulb {
+  filter: drop-shadow(0 0 6px var(--c)) drop-shadow(0 0 12px var(--c));
+  animation: tlTwinkle 2.4s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -0.37s);
+}
+@keyframes tlTwinkle {
+  0%, 100% { opacity: 1; }
+  45% { opacity: 1; }
+  60% { opacity: 0.45; filter: none; }
+  75% { opacity: 1; }
+}
+@media (max-width: 720px) {
+  .home .xmas-title {
+    margin-top: -18px;
+    padding-top: 0.6em;
+  }
+}

@@ -4,6 +4,7 @@ import Snow from './components/Snow.jsx';
 import Sleigh from './components/Sleigh.jsx';
 import Ornaments from './components/Ornaments.jsx';
 import Logo from './components/Logo.jsx';
+import Music from './components/Music.jsx';
 import CancelDialog from './components/CancelDialog.jsx';
 import { AnimatePresence } from 'framer-motion';
 import Home from './pages/Home.jsx';
@@ -74,6 +75,8 @@ export default function App() {
           <Logo className="brand-logo" />
           <span className="brand-sub">božićni domjenak</span>
         </a>
+        <div className="topbar-actions">
+          <Music />
         {isList ? (
           <button className="nav-pill" onClick={() => navigate('/')}>
             ← Prijava
@@ -85,6 +88,7 @@ export default function App() {
             <span className="nav-count">{attendees.length}</span>
           </button>
         )}
+        </div>
       </nav>
 
       {isList ? (

@@ -1350,3 +1350,97 @@ h1 {
     translate: 0 0;
   }
 }
+
+/* ---------- glazba ---------- */
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.music-btn {
+  position: relative;
+  height: 50px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px 0 6px;
+  border-radius: 999px;
+  border: 2px solid rgba(245, 183, 40, 0.75);
+  background: linear-gradient(135deg, #c8172d, #8f0f22);
+  box-shadow: 0 0 0 4px rgba(226, 38, 58, 0.18), 0 6px 20px rgba(226, 38, 58, 0.35);
+  color: #fff;
+  font-weight: 800;
+  font-size: 14px;
+  white-space: nowrap;
+  transition: transform 0.2s, filter 0.2s, box-shadow 0.2s;
+}
+.music-btn:hover {
+  transform: translateY(-1px) scale(1.04);
+  filter: brightness(1.08);
+}
+.music-btn.on {
+  animation: bellGlow 2.4s ease-in-out infinite;
+}
+.music-btn[aria-pressed='false'] {
+  background: linear-gradient(135deg, #3a4270, #252c55);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  color: rgba(255, 255, 255, 0.8);
+}
+.music-bell {
+  width: 40px;
+  height: 40px;
+  overflow: visible;
+}
+.music-btn[aria-pressed='false'] .bell-swing {
+  filter: grayscale(1) brightness(0.9);
+}
+.bell-swing {
+  transform-origin: 32px 12px;
+}
+.music-btn.on .bell-swing {
+  animation: bellRing 1.6s ease-in-out infinite;
+}
+.music-btn.on .bell-clapper {
+  transform-origin: 32px 40px;
+  animation: bellRing 1.6s ease-in-out infinite reverse;
+}
+@keyframes bellRing {
+  0%, 100% { transform: rotate(0); }
+  15% { transform: rotate(16deg); }
+  35% { transform: rotate(-14deg); }
+  55% { transform: rotate(8deg); }
+  75% { transform: rotate(-4deg); }
+}
+@keyframes bellGlow {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(226, 38, 58, 0.18), 0 6px 20px rgba(226, 38, 58, 0.35); }
+  50% { box-shadow: 0 0 0 8px rgba(245, 183, 40, 0.22), 0 6px 26px rgba(245, 183, 40, 0.45); }
+}
+.music-notes {
+  position: absolute;
+  left: 10px;
+  top: 0;
+  pointer-events: none;
+}
+.music-notes i {
+  position: absolute;
+  font-style: normal;
+  font-size: 16px;
+  color: #ffe58a;
+  text-shadow: 0 0 8px rgba(255, 229, 138, 0.8);
+  opacity: 0;
+  animation: noteUp 2.4s ease-out infinite;
+}
+.music-notes i:nth-child(2) { left: 16px; animation-delay: 0.8s; font-size: 14px; }
+.music-notes i:nth-child(3) { left: 6px; animation-delay: 1.6s; }
+@keyframes noteUp {
+  0% { transform: translate(0, 0) rotate(0); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translate(-10px, -34px) rotate(-20deg); opacity: 0; }
+}
+@media (max-width: 720px) {
+  .music-btn { height: 44px; padding: 0 4px; }
+  .music-label { display: none; }
+  .music-bell { width: 36px; height: 36px; }
+}

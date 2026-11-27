@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, animate, motion } from 'framer-motion';
 import Sleigh from './Sleigh.jsx';
 import Avatar from './Avatar.jsx';
-import { jingle } from '../sound.js';
 import { firstName } from '../api.js';
 
 // Faze: spot -> arrive -> ho -> pickup -> away -> done
@@ -36,12 +35,10 @@ export default function SuccessAnimation({ person, already, onShowList, onClose 
   useEffect(() => {
     if (reduced) return;
     const timers = TIMELINE.map(([p, ms]) => setTimeout(() => setPhase(p), ms));
-    timers.push(setTimeout(() => jingle(1.4), 600));
     return () => timers.forEach(clearTimeout);
   }, [reduced]);
 
   useEffect(() => {
-    if (phase === 'ho') jingle(0.8);
     if (phase === 'done') setSeated(true);
   }, [phase]);
 

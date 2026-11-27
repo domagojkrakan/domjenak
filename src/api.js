@@ -25,7 +25,8 @@ export function normalize(s) {
     .trim();
 }
 
-export const EVENT_DATE = new Date('2026-12-10T00:00:00');
+// Početak domjenka (za odbrojavanje). Promijeni vrijeme kad bude poznato.
+export const EVENT_DATE = new Date('2026-12-10T17:00:00+01:00');
 
 export function daysUntil(date = EVENT_DATE) {
   const now = new Date();

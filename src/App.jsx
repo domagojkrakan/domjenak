@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import ZadarScene from './components/ZadarScene.jsx';
 import Snow from './components/Snow.jsx';
 import Sleigh from './components/Sleigh.jsx';
+import Ornaments from './components/Ornaments.jsx';
 import Home from './pages/Home.jsx';
 import Attendees from './pages/Attendees.jsx';
 import { fetchAttendees } from './api.js';
@@ -53,6 +54,7 @@ export default function App() {
         <Sleigh className="sky-sleigh" />
         <Snow />
       </div>
+      <Ornaments />
 
       <nav className="topbar">
         <a

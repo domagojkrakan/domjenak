@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 import RsvpCard from '../components/RsvpCard.jsx';
 import SuccessAnimation from '../components/SuccessAnimation.jsx';
-import { rsvp, daysUntil } from '../api.js';
+import Countdown from '../components/Countdown.jsx';
+import { rsvp } from '../api.js';
 
 export default function Home({ attendees, onRegistered, navigate }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(null); // { person, already }
-  const days = daysUntil();
 
   const submit = async (person) => {
     setBusy(true);
@@ -33,24 +33,17 @@ export default function Home({ attendees, onRegistered, navigate }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.2, 0.8, 0.2, 1] }}
         >
-          <p className="eyebrow">
-            <span className="dot" /> Rentlio · Božić 2026
-          </p>
           <h1>
-            Božićni
-            <br />
-            <span className="h1-accent">domjenak</span>
+            Božićni <span className="h1-accent">domjenak</span>
           </h1>
           <div className="meta">
             <span className="chip">📅 Četvrtak, 10.12.</span>
             <span className="chip">📍 Zadar · HQ ured</span>
-            {days > 0 && <span className="chip chip-green">⏳ još {days} {days % 10 === 1 && days % 100 !== 11 ? 'dan' : 'dana'}</span>}
-            {days === 0 && <span className="chip chip-green">✨ Danas je dan!</span>}
           </div>
+          <Countdown />
           <p className="lead">
-            Drage kolegice i kolege, godina je bila velika — red je da je zajedno i zaključimo! Ovaj put slavimo u
-            našem uredu u Zadru, uz dobru hranu, piće i još bolje društvo. Dodatne informacije stižu uskoro, a za
-            sada nam samo javi da dolaziš — da znamo koliko kolača treba ispeći. 🍪
+            Godina je bila velika — red je da je zajedno i zaključimo! 🎄 Javi nam da dolaziš, a sve dodatne
+            informacije stižu uskoro.
           </p>
         </motion.section>
 

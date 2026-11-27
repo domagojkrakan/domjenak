@@ -1632,7 +1632,7 @@ h1 {
 }
 .rap-santa.walking {
   transform: translateX(0);
-  transition: transform 5.2s linear;
+  transition: transform 4.2s linear;
 }
 .rap-santa.arrived {
   transform: translateX(0);

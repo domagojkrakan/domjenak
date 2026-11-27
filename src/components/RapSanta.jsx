@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { audio, playMusic, useMusic } from '../music.js';
 import { SANTA_JOKES, WARMUP_LINES, beatAt, jokeAt, sectionAt, vocalAt } from '../rap.js';
 
-const WALK_MS = 5200;
+const WALK_MS = 4200;
 const rot = (el, deg) => el && (el.style.transform = `rotate(${deg}deg)`);
 
 // Reper Djed Božićnjak: ušeće s desne strane, zagrijava se dok traje uvod,
@@ -22,8 +22,8 @@ export default function RapSanta() {
   // ulazak u ekran
   useEffect(() => {
     if (reduced) return;
-    const a = setTimeout(() => setWalking(true), 700);
-    const b = setTimeout(() => setArrived(true), 700 + WALK_MS);
+    const a = setTimeout(() => setWalking(true), 300);
+    const b = setTimeout(() => setArrived(true), 300 + WALK_MS);
     return () => {
       clearTimeout(a);
       clearTimeout(b);

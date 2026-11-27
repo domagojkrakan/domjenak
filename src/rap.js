@@ -8,13 +8,13 @@ export const barStart = (k) => FIRST_BEAT + k * BAR;
 
 // Dijelovi pjesme (u sekundama skraćene snimke).
 export const SECTIONS = [
-  { name: 'intro', from: 0, to: barStart(10) },
-  { name: 'rap', from: barStart(10), to: barStart(34) },
-  { name: 'hook', from: barStart(34), to: barStart(42) },
-  { name: 'rap', from: barStart(42), to: barStart(68) },
-  { name: 'hook', from: barStart(68), to: barStart(82) },
-  { name: 'rap', from: barStart(82), to: barStart(84) },
-  { name: 'outro', from: barStart(84), to: Infinity },
+  { name: 'intro', from: 0, to: barStart(3) },
+  { name: 'rap', from: barStart(3), to: barStart(27) },
+  { name: 'hook', from: barStart(27), to: barStart(35) },
+  { name: 'rap', from: barStart(35), to: barStart(61) },
+  { name: 'hook', from: barStart(61), to: barStart(75) },
+  { name: 'rap', from: barStart(75), to: barStart(77) },
+  { name: 'outro', from: barStart(77), to: Infinity },
 ];
 
 export function sectionAt(t) {
@@ -36,7 +36,7 @@ export function vocalAt(t) {
 // Što Djed govori dok se zagrijava (prije nego krene vokal).
 export const WARMUP_LINES = ['Mic check… 1, 2 🎤', 'Ej, Zadar! 👋', 'Zagrijavam se… 🧣', 'Sobovi, dajte beat! 🦌', 'Jel se čujem? 🎧', 'Spreman sam! 🔥'];
 
-export const HOOK_START = barStart(34);
+export const HOOK_START = barStart(27);
 
 // Djed komentira dok Baba pjeva refren.
 export const SANTA_JOKES = [

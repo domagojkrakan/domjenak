@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Avatar from './Avatar.jsx';
 import { cancelRsvp, firstName } from '../api.js';
+import { getMe, setMe } from '../me.js';
 
 // Otkazivanje dolaska: potvrda -> "Žao nam je".
 export default function CancelDialog({ person, onCancelled, onClose }) {
@@ -22,6 +23,7 @@ export default function CancelDialog({ person, onCancelled, onClose }) {
     try {
       await cancelRsvp(person.slug);
       onCancelled(person.slug);
+      if (getMe()?.slug === person.slug) setMe(null);
       setStage('done');
     } catch (e) {
       setError(e.message);

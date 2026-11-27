@@ -8,6 +8,9 @@ Landing stranica za prijavu na božićni domjenak — **četvrtak, 10. prosinca 
 - Stranica **/popis** („Tko dolazi?”) prikazuje sve prijavljene, ukupan broj i tko se još nije javio. Gumb je uvijek gore desno.
 - Tko nije na popisu, može upisati ime i prezime ručno.
 - Dolazak se može otkazati klikom na svoje ime na popisu (ili „Ipak ne mogu doći” na početnoj) — uz poruku „Žao nam je!”.
+- **/smjestaj** — prijavljeni biraju cimera (po dvoje u sobi). Nakon odabira oboje „padnu” na jastuke bračnog kreveta i navuče se deka. Ispod su kartice soba, tablica „tko je s kim” i popis onih koji još nemaju cimera.
+- **/prijevoz** — karta Hrvatske s rutama prema Zadru. Tko ima auto, ponudi vožnju (grad polaska, 2–4 osobe s vozačem, vrijeme, napomena), a ostali „uskoče u saonice”. Ispod je tablica svih vožnji.
+- Stranica pamti tko si (nakon prijave ili odabirom „Tko si ti?”). Kad netko otkaže dolazak, automatski se makne iz sobe i iz vožnji.
 
 ## Pokretanje lokalno
 
@@ -26,6 +29,14 @@ Lokalno se prijave spremaju u `.data/rsvp.json` (nije u gitu).
 
 Prijavu brišeš tako da u Vercel → Storage → Blob obrišeš datoteku `rsvp/<ime-prezime>.json`.
 
+Smještaj i prijevoz su u istom Blob storeu:
+
+- `room/<cimer1>--<cimer2>.json` — jedna soba
+- `ride/<vozač>--<id>.json` — ponuđena vožnja
+- `seat/<vozač>--<putnik>.json` — putnik u vožnji
+
+Lokalno se sve sprema u `.data/`.
+
 ## Dodavanje novih ljudi
 
 Ubaci fotografiju u folder `Ljudi/` (ime datoteke = „Ime Prezime.png”) i pokreni:
@@ -41,7 +52,9 @@ npm run people
 - `src/components/RsvpCard.jsx` — pretraga i odabir osobe
 - `src/components/SuccessAnimation.jsx` — animacija nakon prijave
 - `src/pages/Attendees.jsx` — popis „Tko dolazi?”
-- `api/rsvp.js` + `lib/store.js` — API (Vercel funkcija; lokalno ga poslužuje Vite)
+- `src/pages/Smjestaj.jsx` + `src/components/Bed.jsx` — sobe i animacija kreveta
+- `src/pages/Prijevoz.jsx` + `src/components/CroatiaMap.jsx` + `RideSleigh.jsx` — vožnje, karta i saonice
+- `api/rsvp.js`, `api/rooms.js`, `api/rides.js` + `lib/` — API (Vercel funkcije; lokalno ih poslužuje Vite)
 
 ## Glazba i reper Djed Božićnjak
 

@@ -5,6 +5,7 @@ import SuccessAnimation from '../components/SuccessAnimation.jsx';
 import Countdown from '../components/Countdown.jsx';
 import GuestsButton from '../components/GuestsButton.jsx';
 import { rsvp } from '../api.js';
+import { setMe } from '../me.js';
 
 export default function Home({ attendees, onRegistered, navigate, onCancel }) {
   const [busy, setBusy] = useState(false);
@@ -17,6 +18,7 @@ export default function Home({ attendees, onRegistered, navigate, onCancel }) {
     try {
       const res = await rsvp(person);
       onRegistered(res.entry);
+      setMe({ slug: res.entry.slug, name: res.entry.name, photo: res.entry.photo });
       setDone({ person: { ...person, photo: res.entry.photo }, already: res.already });
     } catch (e) {
       setError(e.message);
@@ -62,6 +64,24 @@ export default function Home({ attendees, onRegistered, navigate, onCancel }) {
         </AnimatePresence>
 
         {!done && <GuestsButton attendees={attendees} onClick={() => navigate('/popis')} />}
+        {!done && (
+          <div className="trip-links">
+            <button type="button" className="trip-link trip-link-bed" onClick={() => navigate('/smjestaj')}>
+              <span className="trip-link-icon" aria-hidden="true">🛏️</span>
+              <span>
+                <b>Smještaj</b>
+                <small>Odaberi cimera za sobu</small>
+              </span>
+            </button>
+            <button type="button" className="trip-link trip-link-ride" onClick={() => navigate('/prijevoz')}>
+              <span className="trip-link-icon" aria-hidden="true">🛷</span>
+              <span>
+                <b>Prijevoz</b>
+                <small>Saonice za Zadar</small>
+              </span>
+            </button>
+          </div>
+        )}
       </main>
 
       <AnimatePresence>
@@ -71,6 +91,7 @@ export default function Home({ attendees, onRegistered, navigate, onCancel }) {
             person={done.person}
             already={done.already}
             onShowList={() => navigate('/popis')}
+            navigate={navigate}
             onClose={() => setDone(null)}
           />
         )}

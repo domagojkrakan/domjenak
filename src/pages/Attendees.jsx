@@ -14,7 +14,7 @@ function Counter({ value }) {
 }
 
 
-export default function Attendees({ attendees, loading, navigate, onCancel }) {
+export default function Attendees({ attendees, loading, navigate, onCancel, subnav }) {
   const sorted = useMemo(() => [...attendees].sort((a, b) => a.name.localeCompare(b.name, 'hr')), [attendees]);
   const going = useMemo(() => new Set(attendees.map((a) => a.slug)), [attendees]);
   const waiting = PEOPLE.filter((p) => !going.has(p.slug));
@@ -23,6 +23,7 @@ export default function Attendees({ attendees, loading, navigate, onCancel }) {
 
   return (
     <main className="list-page">
+      {subnav}
       <motion.header
         className="list-head"
         initial={{ opacity: 0, y: 20 }}

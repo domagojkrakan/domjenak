@@ -53,3 +53,33 @@ export function osoba(n) {
   if (d >= 2 && d <= 4 && (h < 12 || h > 14)) return 'osobe dolaze';
   return 'osoba dolazi';
 }
+
+async function call(url, options) {
+  const r = await fetch(url, { cache: 'no-store', ...options });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || 'Nešto je pošlo po zlu. Pokušaj ponovno.');
+  return data;
+}
+const post = (url, body) =>
+  call(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+
+// ---------- smještaj ----------
+export const fetchRooms = () => call('/api/rooms').then((d) => d.rooms);
+export const pairRoom = (me, mate) => post('/api/rooms', { me, mate });
+export const leaveRoom = (me) => call(`/api/rooms?slug=${encodeURIComponent(me)}`, { method: 'DELETE' });
+
+// ---------- prijevoz ----------
+export const fetchRides = () => call('/api/rides').then((d) => d.rides);
+export const createRide = (ride) => post('/api/rides', { action: 'create', ...ride });
+export const joinRide = (me, driver) => post('/api/rides', { action: 'join', me, driver });
+export const leaveRide = (me) => post('/api/rides', { action: 'leave', me });
+export const cancelRide = (me) => post('/api/rides', { action: 'cancel', me });
+
+// "1 mjesto", "2 mjesta", "5 mjesta"
+export function mjesta(n) {
+  const d = n % 10;
+  const h = n % 100;
+  if (d === 1 && h !== 11) return 'slobodno mjesto';
+  if (d >= 2 && d <= 4 && (h < 12 || h > 14)) return 'slobodna mjesta';
+  return 'slobodnih mjesta';
+}

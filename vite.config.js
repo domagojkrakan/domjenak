@@ -1,14 +1,17 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// U razvoju /api/rsvp poslužuje ista funkcija koja radi na Vercelu.
+// U razvoju /api/* poslužuju iste funkcije koje rade na Vercelu.
 const localApi = () => ({
   name: 'local-api',
   configureServer(server) {
-    server.middlewares.use('/api/rsvp', async (req, res) => {
-      const mod = await server.ssrLoadModule('/api/rsvp.js');
-      return mod.default(req, res);
-    });
+    for (const name of ['rsvp', 'rooms', 'rides']) {
+      server.middlewares.use(`/api/${name}`, async (req, res) => {
+        req.url = req.originalUrl || req.url;
+        const mod = await server.ssrLoadModule(`/api/${name}.js`);
+        return mod.default(req, res);
+      });
+    }
   },
 });
 

@@ -25,7 +25,7 @@ const RIG = {
 
 const at = (phase, list) => list.includes(phase);
 
-export default function SuccessAnimation({ person, already, onShowList, onClose }) {
+export default function SuccessAnimation({ person, already, onShowList, navigate, onClose }) {
   const reduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const [phase, setPhase] = useState(reduced ? 'done' : 'spot');
   const [seated, setSeated] = useState(reduced);
@@ -152,7 +152,25 @@ export default function SuccessAnimation({ person, already, onShowList, onClose 
               <span>📅 Četvrtak, 10. prosinca</span>
               <span>📍 Zadar · HQ ured</span>
             </div>
-            <p className="done-small">Sve dodatne informacije stižu uskoro.</p>
+            <p className="done-small">Sad odaberi cimera i dogovori prijevoz do Zadra:</p>
+            {navigate && (
+              <div className="done-trips">
+                <button className="trip-link trip-link-bed" onClick={() => navigate('/smjestaj')}>
+                  <span className="trip-link-icon" aria-hidden="true">🛏️</span>
+                  <span>
+                    <b>Smještaj</b>
+                    <small>Odaberi cimera</small>
+                  </span>
+                </button>
+                <button className="trip-link trip-link-ride" onClick={() => navigate('/prijevoz')}>
+                  <span className="trip-link-icon" aria-hidden="true">🛷</span>
+                  <span>
+                    <b>Prijevoz</b>
+                    <small>Saonice za Zadar</small>
+                  </span>
+                </button>
+              </div>
+            )}
             <div className="done-actions">
               <button className="btn-primary" onClick={onShowList}>
                 Pogledaj tko sve dolazi →

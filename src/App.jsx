@@ -11,6 +11,9 @@ import CancelDialog from './components/CancelDialog.jsx';
 import { AnimatePresence } from 'framer-motion';
 import Home from './pages/Home.jsx';
 import Attendees from './pages/Attendees.jsx';
+import Smjestaj from './pages/Smjestaj.jsx';
+import Prijevoz from './pages/Prijevoz.jsx';
+import SubNav from './components/SubNav.jsx';
 import { fetchAttendees } from './api.js';
 
 function usePath() {
@@ -32,7 +35,8 @@ export default function App() {
   const [path, navigate] = usePath();
   const [attendees, setAttendees] = useState([]);
   const [loading, setLoading] = useState(true);
-  const isList = path.startsWith('/popis');
+  const page = ['/popis', '/smjestaj', '/prijevoz'].find((p) => path.startsWith(p)) || '/';
+  const isList = page !== '/';
 
   const load = useCallback(async () => {
     try {
@@ -81,16 +85,20 @@ export default function App() {
         </a>
         <div className="topbar-actions">
           <Music />
-        {isList && (
-          <button className="nav-pill" onClick={() => navigate('/')}>
-            ← Prijava
-          </button>
-        )}
+          {isList && (
+            <button className="nav-pill" onClick={() => navigate('/')}>
+              ← Prijava
+            </button>
+          )}
         </div>
       </nav>
 
-      {isList ? (
-        <Attendees attendees={attendees} loading={loading} navigate={navigate} onCancel={setCancelFor} />
+      {page === '/popis' ? (
+        <Attendees attendees={attendees} loading={loading} navigate={navigate} onCancel={setCancelFor} subnav={<SubNav path={path} navigate={navigate} />} />
+      ) : page === '/smjestaj' ? (
+        <Smjestaj attendees={attendees} path={path} navigate={navigate} />
+      ) : page === '/prijevoz' ? (
+        <Prijevoz attendees={attendees} path={path} navigate={navigate} />
       ) : (
         <Home attendees={attendees} onRegistered={onRegistered} navigate={navigate} onCancel={setCancelFor} />
       )}

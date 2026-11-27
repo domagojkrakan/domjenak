@@ -6,6 +6,7 @@ import MeBar, { useGoingMe } from '../components/MeBar.jsx';
 import Avatar from '../components/Avatar.jsx';
 import RideSleigh from '../components/RideSleigh.jsx';
 import PersonPicker from '../components/PersonPicker.jsx';
+import Floater from '../components/Floater.jsx';
 import { byName, everyone } from '../everyone.js';
 import { CITIES, CITY_BY_ID } from '../../lib/cities.js';
 import {
@@ -13,7 +14,9 @@ import {
   createRide,
   declineRide,
   dropFromRide,
-  fetchRides,
+  cancelNeed,
+  fetchTransport,
+  needRide,
   firstName,
   inviteToRide,
   joinRide,
@@ -23,8 +26,9 @@ import {
 
 const CITY_OPTIONS = [...CITIES].sort((a, b) => a.name.localeCompare(b.name, 'hr'));
 const cityName = (id) => CITY_BY_ID.get(id)?.name || id;
+const byAt = (x, y) => x.at.localeCompare(y.at);
 
-function OfferForm({ me, onDone }) {
+function OfferForm({ me, onDone, needs = [] }) {
   const [city, setCity] = useState('');
   const [seats, setSeats] = useState(4);
   const [when, setWhen] = useState('');
@@ -60,10 +64,17 @@ function OfferForm({ me, onDone }) {
           ))}
         </select>
       </label>
+      {city && needs.some((n) => n.city === city) && (
+        <p className="offer-hint">
+          🙋 Iz grada {cityName(city)} prijevoz traži:{' '}
+          <strong>{needs.filter((n) => n.city === city).map((n) => n.P.name).join(', ')}</strong>. Nakon objave ih možeš
+          povesti jednim klikom.
+        </p>
+      )}
       <div className="offer-seats">
-        <span>Koliko nas ide u auto (s tobom)?</span>
+        <span>Koliko nas ide u auto (s tobom)? Kombi = 8 (7+1) 🚐</span>
         <div className="seat-toggle" role="radiogroup">
-          {[2, 3, 4].map((n) => (
+          {[2, 3, 4, 5, 6, 7, 8].map((n) => (
             <button
               key={n}
               type="button"
@@ -93,9 +104,64 @@ function OfferForm({ me, onDone }) {
   );
 }
 
+function NeedForm({ me, current, onDone, onCancel }) {
+  const [city, setCity] = useState(current?.city || '');
+  const [note, setNote] = useState(current?.note || '');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!city) return setError('Odaberi grad u kojem se nalaziš.');
+    setBusy(true);
+    setError('');
+    try {
+      await needRide(me.slug, city, note);
+      onDone();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <form className="offer-form" onSubmit={submit}>
+      <label>
+        <span>Nalazim se u</span>
+        <select value={city} onChange={(e) => setCity(e.target.value)} required>
+          <option value="">Odaberi grad…</option>
+          {CITY_OPTIONS.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        <span>Napomena</span>
+        <input
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          maxLength={120}
+          placeholder="npr. mogu do Glavnog kolodvora, slobodan od 12h"
+        />
+      </label>
+      {error && <p className="error">{error}</p>}
+      <button type="submit" className="btn-primary" disabled={busy}>
+        {busy ? 'Šaljem…' : '🙋 Trebam prijevoz do Zadra'}
+      </button>
+      <button type="button" className="link" onClick={onCancel}>
+        Odustani
+      </button>
+    </form>
+  );
+}
+
 export default function Prijevoz({ attendees, path, navigate }) {
   const me = useGoingMe(attendees);
-  const [rides, setRides] = useState(null);
+  const [data, setData] = useState(null); // { rides, needs }
+  const [needing, setNeeding] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [offering, setOffering] = useState(false);
@@ -104,12 +170,9 @@ export default function Prijevoz({ attendees, path, navigate }) {
 
   const load = useCallback(async () => {
     try {
-      const list = await fetchRides();
-      setRides(list);
-      return list;
+      setData(await fetchTransport());
     } catch {
-      setRides((r) => r || []);
-      return null;
+      setData((d) => d || { rides: [], needs: [] });
     }
   }, []);
   useEffect(() => {
@@ -120,6 +183,7 @@ export default function Prijevoz({ attendees, path, navigate }) {
 
   const going = useMemo(() => new Set(attendees.map((a) => a.slug)), [attendees]);
   const people = useMemo(() => everyone(attendees), [attendees]);
+  const rides = data?.rides ?? null;
   const list = useMemo(
     () =>
       (rides || [])
@@ -136,8 +200,25 @@ export default function Prijevoz({ attendees, path, navigate }) {
   const incoming = me && !myDrive && !myRide ? list.filter((r) => r.invited.includes(me.slug)) : [];
   const seated = useMemo(() => new Set(list.flatMap((r) => [r.driver, ...r.P.map((p) => p.slug)])), [list]);
   const invitedAny = useMemo(() => new Set(list.flatMap((r) => r.invited)), [list]);
-  const walking = attendees.filter((a) => !seated.has(a.slug)).sort(byName);
+  const floating = new Set((data?.needs || []).map((n) => n.slug));
+  const walking = attendees.filter((a) => !seated.has(a.slug) && !floating.has(a.slug)).sort(byName);
   const freeSeats = list.reduce((n, r) => n + r.free, 0);
+  // tko čeka prijevoz ("visi u zraku")
+  const needs = useMemo(
+    () =>
+      (data?.needs || [])
+        .filter((n) => going.has(n.slug) && !seated.has(n.slug))
+        .map((n) => ({ ...n, P: people.get(n.slug) })),
+    [data, going, seated, people]
+  );
+  const myNeed = me && needs.find((n) => n.slug === me.slug);
+  // vozaču: prvo oni iz istog grada
+  const pickups = myDrive
+    ? needs
+        .filter((n) => !myDrive.invited.includes(n.slug))
+        .sort((x, y) => Number(y.city === myDrive.city) - Number(x.city === myDrive.city) || byAt(x, y))
+    : [];
+  const pickup = (n) => act(() => inviteToRide(me.slug, n.slug));
 
   // koga vozač može dodati: svi koji još nemaju prijevoz (i oni koji se nisu prijavili)
   const candidates = useMemo(
@@ -177,7 +258,7 @@ export default function Prijevoz({ attendees, path, navigate }) {
         transition={{ duration: 0.7, ease: [0.2, 0.8, 0.2, 1] }}
       >
         <p className="eyebrow">
-          <span className="dot" /> Prijevoz · do 4 osobe po saonicama
+          <span className="dot" /> Prijevoz · auto do 4, kombi do 8 osoba
         </p>
         <h1>Saonice za Zadar 🛷</h1>
         <p className="list-hint">
@@ -191,7 +272,7 @@ export default function Prijevoz({ attendees, path, navigate }) {
             <b>{freeSeats}</b> {mjesta(freeSeats)}
           </span>
           <span>
-            <b>{walking.length}</b> još bez prijevoza
+            <b>{walking.length + needs.length}</b> još bez prijevoza
           </span>
         </div>
       </motion.header>
@@ -228,6 +309,29 @@ export default function Prijevoz({ attendees, path, navigate }) {
                 </ul>
               ) : (
                 <p className="my-room-text">Još nitko nije uskočio. Pozovi kolege!</p>
+              )}
+              {myDrive.free > 0 && pickups.length > 0 && !adding && (
+                <div className="pickups">
+                  <h3>🙋 Ovi kolege trebaju prijevoz</h3>
+                  <ul>
+                    {pickups.map((n) => (
+                      <li key={n.slug} className={n.city === myDrive.city ? 'same' : ''}>
+                        <Avatar person={n.P} size={40} snow={false} />
+                        <span className="pickup-text">
+                          <b>{n.P.name}</b>
+                          <small>
+                            📍 {cityName(n.city)}
+                            {n.city === myDrive.city && ' · usput!'}
+                            {n.note && ` · „${n.note}”`}
+                          </small>
+                        </span>
+                        <button type="button" className="btn-primary" disabled={busy} onClick={() => pickup(n)}>
+                          Poveži 🛷
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
               {myDrive.free > 0 &&
                 (adding ? (
@@ -288,6 +392,7 @@ export default function Prijevoz({ attendees, path, navigate }) {
               <h2>Nudim prijevoz</h2>
               <OfferForm
                 me={me}
+                needs={needs}
                 onDone={async () => {
                   setOffering(false);
                   await load();
@@ -317,22 +422,82 @@ export default function Prijevoz({ attendees, path, navigate }) {
                   </div>
                 </div>
               ))}
-              <h2>Kako ideš u Zadar?</h2>
-              <div className="trip-choice">
-                <button type="button" className="choice-btn" onClick={() => setOffering(true)}>
-                  <span aria-hidden="true">🚗</span>
-                  <b>Imam auto</b>
-                  <small>Ponudi mjesta i pozovi kolege</small>
-                </button>
-                <a href="#voznje" className="choice-btn">
-                  <span aria-hidden="true">🙋</span>
-                  <b>Trebam prijevoz</b>
-                  <small>Uskoči u nečije saonice</small>
-                </a>
-              </div>
+              {needing ? (
+                <>
+                  <h2>{myNeed ? 'Uredi zahtjev' : 'Trebam prijevoz'} 🙋</h2>
+                  <p className="muted">Reci gdje si, a vozači će te vidjeti i moći te pokupiti.</p>
+                  <NeedForm
+                    me={me}
+                    current={myNeed}
+                    onCancel={() => setNeeding(false)}
+                    onDone={async () => {
+                      setNeeding(false);
+                      await load();
+                    }}
+                  />
+                </>
+              ) : myNeed ? (
+                <>
+                  <h2>Čekaš prijevoz 🎈</h2>
+                  <Floater person={myNeed.P} city={cityName(myNeed.city)} note={myNeed.note} />
+                  <p className="my-room-text">
+                    Visiš u zraku dok te netko ne pokupi. Vozači te vide i mogu te povesti jednim klikom, a možeš i sam/a
+                    uskočiti u neku vožnju ispod.
+                  </p>
+                  <div className="trip-actions">
+                    <button type="button" className="btn-ghost" onClick={() => setNeeding(true)}>
+                      Uredi
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-ghost danger"
+                      disabled={busy}
+                      onClick={() => act(() => cancelNeed(me.slug))}
+                    >
+                      Povuci zahtjev
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h2>Kako ideš u Zadar?</h2>
+                  <div className="trip-choice">
+                    <button type="button" className="choice-btn" onClick={() => setOffering(true)}>
+                      <span aria-hidden="true">🚗</span>
+                      <b>Imam auto</b>
+                      <small>Ponudi mjesta i pozovi kolege</small>
+                    </button>
+                    <button type="button" className="choice-btn" onClick={() => setNeeding(true)}>
+                      <span aria-hidden="true">🙋</span>
+                      <b>Trebam prijevoz</b>
+                      <small>Javi odakle krećeš, netko će te pokupiti</small>
+                    </button>
+                  </div>
+                </>
+              )}
             </>
           )}
           {error && <p className="error">{error}</p>}
+        </section>
+      )}
+
+      {needs.length > 0 && (
+        <section className="trip-section needs-section">
+          <h2 className="trip-title">
+            Čekaju prijevoz <span className="trip-count">{needs.length}</span>
+          </h2>
+          <p className="list-hint">Ovi kolege vise u zraku dok ih netko ne pokupi. 🎈</p>
+          <div className="floaters">
+            {needs.map((n, i) => (
+              <Floater key={n.slug} person={n.P} city={cityName(n.city)} note={n.note} index={i}>
+                {myDrive && myDrive.free > 0 && !myDrive.invited.includes(n.slug) && (
+                  <button type="button" className="btn-primary floater-btn" disabled={busy} onClick={() => pickup(n)}>
+                    Poveži 🛷
+                  </button>
+                )}
+              </Floater>
+            ))}
+          </div>
         </section>
       )}
 

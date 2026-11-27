@@ -2652,3 +2652,168 @@ h1 {
     padding-top: 0.6em;
   }
 }
+
+/* ---------- Trebam prijevoz: ljudi na balonima ---------- */
+.floaters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 28px 18px;
+  margin-top: 18px;
+}
+.floaters .floater {
+  width: 180px;
+}
+.needs-section .list-hint {
+  text-align: center;
+}
+.floater {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 0 6px 16px;
+}
+.floater-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: floater-bob 4.2s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+  transform-origin: 50% 0;
+}
+.floater-balloons {
+  width: 104px;
+  height: 104px;
+  margin-bottom: -10px;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.25));
+}
+.floater-body .avatar {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+.floater-name {
+  margin: 8px 0 0;
+  font-weight: 700;
+  color: #fff;
+}
+.floater-city {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 0.82rem;
+  color: #fff;
+}
+.floater-note {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.75);
+  max-width: 220px;
+}
+.floater-btn {
+  margin-top: 6px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+}
+.my-room .floater {
+  margin: 4px auto 6px;
+}
+@keyframes floater-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2.5deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(2.5deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .floater-body {
+    animation: none;
+  }
+}
+
+/* prijedlozi vozaču */
+.pickups {
+  margin: 18px 0 6px;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255, 209, 102, 0.08);
+  border: 1px dashed rgba(255, 209, 102, 0.45);
+  text-align: left;
+}
+.pickups h3 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+.pickups ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.pickups li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+}
+.pickups li.same {
+  background: rgba(126, 224, 106, 0.12);
+  border: 1px solid rgba(126, 224, 106, 0.35);
+}
+.pickup-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.pickup-text small {
+  color: rgba(255, 255, 255, 0.72);
+}
+.pickups .btn-primary {
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+.offer-hint {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 209, 102, 0.1);
+  border: 1px solid rgba(255, 209, 102, 0.35);
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+/* kombi (5–8 mjesta): putnici u dva reda */
+.ride-sleigh.van {
+  max-width: 400px;
+}
+.ride-sleigh.van.small {
+  max-width: 270px;
+}
+.ride-sleigh.van .rs-seats {
+  row-gap: 6px;
+  padding: 0 12% 0 8%;
+}
+@media (max-width: 520px) {
+  .seat-toggle {
+    gap: 5px;
+  }
+  .seat-toggle button {
+    height: 42px;
+    font-size: 16px;
+    border-radius: 12px;
+  }
+}
+.ride-sleigh.van .rs-seats {
+  margin-bottom: -4%;
+}

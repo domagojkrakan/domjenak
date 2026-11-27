@@ -6,12 +6,12 @@ export default function RideSleigh({ people, seats = 4, play = false, className 
   const slots = Array.from({ length: seats }, (_, i) => people[i] || null);
   return (
     <motion.div
-      className={`ride-sleigh ${play ? 'play' : ''} ${className}`}
+      className={`ride-sleigh ${seats > 4 ? 'van' : ''} ${play ? 'play' : ''} ${className}`}
       {...(play
         ? { initial: { x: '-120%' }, animate: { x: 0 }, transition: { type: 'spring', stiffness: 70, damping: 14 } }
         : {})}
     >
-      <div className="rs-seats" style={{ '--n': seats }}>
+      <div className="rs-seats" style={{ '--n': seats > 4 ? Math.ceil(seats / 2) : seats }}>
         {slots.map((p, i) => (
           <motion.span
             key={i}

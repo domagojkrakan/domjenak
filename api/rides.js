@@ -5,7 +5,21 @@
 //                  { action: 'invite', me, who }       vozač dodaje kolegu
 //                  { action: 'drop', me, who }         vozač miče putnika / povlači poziv
 //                  { action: 'leave', me } | { action: 'cancel', me }
-import { cancelRide, createRide, declineRide, dropFromRide, inviteRide, joinRide, leaveRide, listRides } from '../lib/trips.js';
+//                  { action: 'need', me, city, note }  trebam prijevoz | { action: 'unneed', me }
+// GET vraća i needs: [{ slug, city, note, at }]
+import {
+  cancelNeed,
+  cancelRide,
+  createRide,
+  declineRide,
+  dropFromRide,
+  inviteRide,
+  joinRide,
+  leaveRide,
+  listNeeds,
+  listRides,
+  needRide,
+} from '../lib/trips.js';
 import { readBody, send } from '../lib/http.js';
 
 const ACTIONS = {
@@ -16,11 +30,16 @@ const ACTIONS = {
   drop: dropFromRide,
   leave: (b) => leaveRide(b.me),
   cancel: (b) => cancelRide(b.me),
+  need: needRide,
+  unneed: (b) => cancelNeed(b.me),
 };
 
 export default async function handler(req, res) {
   try {
-    if (req.method === 'GET') return send(res, 200, { rides: await listRides() });
+    if (req.method === 'GET') {
+      const [rides, needs] = await Promise.all([listRides(), listNeeds()]);
+      return send(res, 200, { rides, needs });
+    }
     if (req.method === 'POST') {
       const body = await readBody(req);
       const fn = ACTIONS[body.action];

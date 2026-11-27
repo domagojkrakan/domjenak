@@ -72,6 +72,9 @@ export const leaveRoom = (me) => call(`/api/rooms?slug=${encodeURIComponent(me)}
 
 // ---------- prijevoz ----------
 export const fetchRides = () => call('/api/rides').then((d) => d.rides);
+export const fetchTransport = () => call('/api/rides').then((d) => ({ rides: d.rides, needs: d.needs || [] }));
+export const needRide = (me, city, note) => post('/api/rides', { action: 'need', me, city, note });
+export const cancelNeed = (me) => post('/api/rides', { action: 'unneed', me });
 export const createRide = (ride) => post('/api/rides', { action: 'create', ...ride });
 export const joinRide = (me, driver) => post('/api/rides', { action: 'join', me, driver });
 export const leaveRide = (me) => post('/api/rides', { action: 'leave', me });

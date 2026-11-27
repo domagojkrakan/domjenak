@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 // Ilustrirani zimski Zadar u sumrak (sunce je taman zašlo): Velebit obasjan
 // ružičastim, stari grad sa Sv. Donatom i zvonikom Sv. Stošije, lampice,
-// more, Pozdrav suncu i Morske orgulje na rivi.
+// more i Morske orgulje na rivi.
 
 function rng(seed) {
   return () => {
@@ -165,13 +165,6 @@ export default function ZadarScene() {
           <stop offset="0" stopColor="#ffe3a0" stopOpacity="0.7" />
           <stop offset="1" stopColor="#ffe3a0" stopOpacity="0" />
         </radialGradient>
-        <linearGradient id="sun" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#4cd2ff" />
-          <stop offset="0.25" stopColor="#A9CF3A" />
-          <stop offset="0.5" stopColor="#ffd24a" />
-          <stop offset="0.75" stopColor="#ff5d9e" />
-          <stop offset="1" stopColor="#8a6bff" />
-        </linearGradient>
         <linearGradient id="stone" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#5a6cb0" />
           <stop offset="1" stopColor="#36458a" />
@@ -392,15 +385,6 @@ export default function ZadarScene() {
         d="M0 834 Q60 822 120 832 T240 830 T360 832 T480 829 T600 831 T720 828 T840 830 T960 826 T1080 828 T1200 824 T1320 826 T1440 822 T1600 822 L1600 836 L0 846 Z"
         fill="#fff6f8"
       />
-
-      {/* Pozdrav suncu */}
-      <g className="sun-greeting">
-        <ellipse cx="820" cy="866" rx="160" ry="26" fill="url(#sun)" opacity="0.25" />
-        <ellipse cx="820" cy="866" rx="130" ry="16" fill="url(#sun)" opacity="0.95" />
-        {Array.from({ length: 18 }, (_, i) => (
-          <line key={i} x1={820 + Math.cos((i / 18) * Math.PI * 2) * 40} y1={866 + Math.sin((i / 18) * Math.PI * 2) * 5} x2={820 + Math.cos((i / 18) * Math.PI * 2) * 128} y2={866 + Math.sin((i / 18) * Math.PI * 2) * 15.5} stroke="#1f2a5e" strokeWidth="1.2" opacity="0.45" />
-        ))}
-      </g>
 
       {/* palme s lampicama i kuglicama */}
       {[[650, 836, 1], [1120, 830, -1]].map(([px, py, dir], i) => (

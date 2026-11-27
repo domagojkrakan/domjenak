@@ -3,6 +3,7 @@ import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 import RsvpCard from '../components/RsvpCard.jsx';
 import SuccessAnimation from '../components/SuccessAnimation.jsx';
 import Countdown from '../components/Countdown.jsx';
+import GuestsButton from '../components/GuestsButton.jsx';
 import { rsvp } from '../api.js';
 
 export default function Home({ attendees, onRegistered, navigate, onCancel }) {
@@ -59,6 +60,8 @@ export default function Home({ attendees, onRegistered, navigate, onCancel }) {
             />
           )}
         </AnimatePresence>
+
+        {!done && <GuestsButton attendees={attendees} onClick={() => navigate('/popis')} />}
       </main>
 
       <AnimatePresence>

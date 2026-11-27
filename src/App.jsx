@@ -77,15 +77,9 @@ export default function App() {
         </a>
         <div className="topbar-actions">
           <Music />
-        {isList ? (
+        {isList && (
           <button className="nav-pill" onClick={() => navigate('/')}>
             ← Prijava
-          </button>
-        ) : (
-          <button className="nav-pill" onClick={() => navigate('/popis')}>
-            <span className="nav-bulb" aria-hidden="true" />
-            Tko dolazi?
-            <span className="nav-count">{attendees.length}</span>
           </button>
         )}
         </div>

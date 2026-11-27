@@ -45,3 +45,11 @@ export async function cancelRsvp(slug) {
   if (!r.ok) throw new Error(data.error || 'Otkazivanje nije uspjelo. Pokušaj ponovno.');
   return data;
 }
+
+// "1 osoba dolazi", "3 osobe dolaze", "5 osoba dolazi"
+export function osoba(n) {
+  const d = n % 10;
+  const h = n % 100;
+  if (d >= 2 && d <= 4 && (h < 12 || h > 14)) return 'osobe dolaze';
+  return 'osoba dolazi';
+}

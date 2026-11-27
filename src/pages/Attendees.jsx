@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { animate, motion } from 'framer-motion';
 import { PEOPLE } from '../people.js';
 import Avatar from '../components/Avatar.jsx';
+import { osoba } from '../api.js';
 
 function Counter({ value }) {
   const [n, setN] = useState(0);
@@ -12,13 +13,6 @@ function Counter({ value }) {
   return <span>{n}</span>;
 }
 
-function osoba(n) {
-  const d = n % 10;
-  const h = n % 100;
-  if (d === 1 && h !== 11) return 'osoba dolazi';
-  if (d >= 2 && d <= 4 && (h < 12 || h > 14)) return 'osobe dolaze';
-  return 'osoba dolazi';
-}
 
 export default function Attendees({ attendees, loading, navigate, onCancel }) {
   const sorted = useMemo(() => [...attendees].sort((a, b) => a.name.localeCompare(b.name, 'hr')), [attendees]);

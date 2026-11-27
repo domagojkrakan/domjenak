@@ -57,6 +57,7 @@ Na VPS-u server drži upaljen npr. `pm2 start server.js --name domjenak` iza ngi
 Varijable:
 
 - `PORT` — port (zadano 3000), `HOST` — adresa (zadano 0.0.0.0)
+- `SITE_URL` — puna adresa stranice (npr. `https://domjenak.rentlio.com`) za sliku pri dijeljenju linka; bez nje se adresa uzima iz zahtjeva
 - `DATA_DIR` — mapa s podacima (zadano `./.data`). Postavi je izvan mape aplikacije
   (npr. `/home/korisnik/domjenak-data`) da nova verzija ne pregazi prijave. Za sigurnosnu kopiju dovoljno je kopirati tu mapu.
 
@@ -95,6 +96,12 @@ Ubaci fotografiju u folder `Ljudi/` (ime datoteke = „Ime Prezime.png”) i pok
 ```bash
 npm run people
 ```
+
+## Slika za dijeljenje (OG)
+
+`public/og.jpg` (1200×630). Sav tekst je u središnjem kvadratu 630×630 jer neke aplikacije sliku režu na kvadrat.
+Izvor je `og.html` + `src/og/` (nije dio builda): `npm run dev`, otvori http://localhost:5173/og.html u prozoru 1200×630
+i napravi snimku zaslona. `server.js` u `index.html` upisuje punu adresu slike (`og:image`) jer je Facebook/WhatsApp traže.
 
 ## Struktura
 

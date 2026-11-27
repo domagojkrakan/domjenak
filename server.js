@@ -2,7 +2,7 @@
 //   npm run build && npm start
 // Poslužuje izgrađenu stranicu iz dist/ i API (/api/rsvp, /api/rooms, /api/rides).
 // Podaci se spremaju u JSON datoteke u mapi DATA_DIR (zadano: ./.data).
-// Varijable: PORT (zadano 3000), HOST (zadano 0.0.0.0), DATA_DIR.
+// Varijable: PORT (zadano 3000), HOST (zadano 0.0.0.0), DATA_DIR, SITE_URL (puna adresa za slike pri dijeljenju).
 import http from 'node:http';
 import { promises as fs, createReadStream } from 'node:fs';
 import path from 'node:path';
@@ -95,6 +95,26 @@ async function serveFile(req, res, file, { immutable = false } = {}) {
   return createReadStream(file).pipe(res);
 }
 
+// Puna adresa stranice za og:image / og:url (Facebook, WhatsApp, LinkedIn traže apsolutni URL).
+// SITE_URL (npr. https://domjenak.rentlio.com) ima prednost; inače se slaže iz zahtjeva.
+function originOf(req) {
+  if (process.env.SITE_URL) return process.env.SITE_URL.replace(/\/$/, '');
+  const proto = String(req.headers['x-forwarded-proto'] || (req.socket.encrypted ? 'https' : 'http')).split(',')[0].trim();
+  const host = String(req.headers['x-forwarded-host'] || req.headers.host || 'localhost').split(',')[0].trim();
+  return `${proto}://${host}`;
+}
+
+async function serveIndex(req, res) {
+  const origin = originOf(req);
+  const html = (await fs.readFile(path.join(DIST, 'index.html'), 'utf8'))
+    .replace(/(property="og:url" content=")\/(")/, `$1${origin}/$2`)
+    .replace(/(content=")\/og\.jpg(")/g, `$1${origin}/og.jpg$2`);
+  res.setHeader('Content-Type', TYPES['.html']);
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Content-Length', Buffer.byteLength(html));
+  return res.end(req.method === 'HEAD' ? undefined : html);
+}
+
 async function handleStatic(req, res, pathname) {
   let rel;
   try {
@@ -109,16 +129,18 @@ async function handleStatic(req, res, pathname) {
   }
   try {
     const stat = await fs.stat(file);
-    if (stat.isFile()) return await serveFile(req, res, file, { immutable: rel.startsWith('/assets/') });
+    if (stat.isFile() && path.basename(file) !== 'index.html') {
+      return await serveFile(req, res, file, { immutable: rel.startsWith('/assets/') });
+    }
   } catch {
     /* nije datoteka -> SPA */
   }
   // nepostojeća datoteka s ekstenzijom -> 404; inače je to ruta aplikacije (/prijevoz, /smjestaj…)
-  if (path.extname(rel)) {
+  if (path.extname(rel) && path.basename(rel) !== 'index.html') {
     res.statusCode = 404;
     return res.end('Not found');
   }
-  return serveFile(req, res, path.join(DIST, 'index.html'));
+  return serveIndex(req, res);
 }
 
 const server = http.createServer(async (req, res) => {

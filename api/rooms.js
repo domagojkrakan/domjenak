@@ -1,8 +1,9 @@
-// GET    /api/rooms                              -> { rooms: [{ a, b, at }], invites: [{ from, to, at }] }
+// GET    /api/rooms                              -> { rooms: [{ a, b, at }], invites: [{ from, to, at }], skip: [slug] }
 // POST   /api/rooms { me, mate }                 -> { room } ili { invite } (ako se cimer još nije prijavio)
 // POST   /api/rooms { action: 'accept'|'decline', me, from }
+// POST   /api/rooms { action: 'skip'|'unskip', me } -> ne trebam smještaj / ipak trebam
 // DELETE /api/rooms?slug=...                     -> raskini sobu / povuci poziv
-import { acceptRoom, declineRoom, leaveRoom, listRooms, pairRoom } from '../lib/trips.js';
+import { acceptRoom, declineRoom, leaveRoom, listRooms, pairRoom, skipRoom, unskipRoom } from '../lib/trips.js';
 import { readBody, send } from '../lib/http.js';
 
 export default async function handler(req, res) {
@@ -12,6 +13,8 @@ export default async function handler(req, res) {
       const body = await readBody(req);
       if (body.action === 'accept') return send(res, 200, await acceptRoom(body));
       if (body.action === 'decline') return send(res, 200, await declineRoom(body));
+      if (body.action === 'skip') return send(res, 200, await skipRoom(body));
+      if (body.action === 'unskip') return send(res, 200, await unskipRoom(body));
       return send(res, 200, await pairRoom(body));
     }
     if (req.method === 'DELETE') {

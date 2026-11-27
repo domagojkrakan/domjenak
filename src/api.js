@@ -64,7 +64,9 @@ const post = (url, body) =>
   call(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 
 // ---------- smještaj ----------
-export const fetchRooms = () => call('/api/rooms'); // { rooms, invites }
+export const fetchRooms = () => call('/api/rooms'); // { rooms, invites, skip }
+export const skipRoom = (me) => post('/api/rooms', { action: 'skip', me });
+export const unskipRoom = (me) => post('/api/rooms', { action: 'unskip', me });
 export const pairRoom = (me, mate) => post('/api/rooms', { me, mate });
 export const acceptRoom = (me, from) => post('/api/rooms', { action: 'accept', me, from });
 export const declineRoom = (me, from) => post('/api/rooms', { action: 'decline', me, from });

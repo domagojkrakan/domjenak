@@ -8,12 +8,12 @@ import PersonPicker from '../components/PersonPicker.jsx';
 import Avatar from '../components/Avatar.jsx';
 import Bed from '../components/Bed.jsx';
 import { ask } from '../components/ConfirmHost.jsx';
-import { acceptRoom, declineRoom, fetchRooms, firstName, leaveRoom, pairRoom } from '../api.js';
+import { acceptRoom, declineRoom, fetchRooms, firstName, leaveRoom, pairRoom, skipRoom, unskipRoom } from '../api.js';
 import { byName, everyone } from '../everyone.js';
 
 export default function Smjestaj({ attendees, path, navigate }) {
   const me = useGoingMe(attendees);
-  const [data, setData] = useState(null); // { rooms, invites }
+  const [data, setData] = useState(null); // { rooms, invites, skip }
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [party, setParty] = useState(null); // { a, b } za animaciju
@@ -22,7 +22,7 @@ export default function Smjestaj({ attendees, path, navigate }) {
     try {
       setData(await fetchRooms());
     } catch {
-      setData((d) => d || { rooms: [], invites: [] });
+      setData((d) => d || { rooms: [], invites: [], skip: [] });
     }
   }, []);
   usePoll(load, 45000);
@@ -42,24 +42,28 @@ export default function Smjestaj({ attendees, path, navigate }) {
     return [...rooms, ...invites];
   }, [data, going, people]);
 
+  // prijavljeni koji su javili da ne trebaju smještaj
+  const skipping = useMemo(() => new Set((data?.skip || []).filter((s) => going.has(s))), [data, going]);
   const roomed = useMemo(() => new Set(list.filter((r) => !r.pending).flatMap((r) => [r.a, r.b])), [list]);
   const inviting = useMemo(() => new Set(list.filter((r) => r.pending).map((r) => r.a)), [list]);
   const myRoom = me && list.find((r) => !r.pending && (r.a === me.slug || r.b === me.slug));
   const mate = myRoom && (myRoom.a === me.slug ? myRoom.B : myRoom.A);
   const myInvite = me && !myRoom && list.find((r) => r.pending && r.a === me.slug);
-  const incoming = me && !myRoom && !myInvite ? list.filter((r) => r.pending && r.b === me.slug && !roomed.has(r.a)) : [];
+  const mySkip = me && !myRoom && skipping.has(me.slug);
+  const incoming = me && !myRoom && !myInvite && !mySkip ? list.filter((r) => r.pending && r.b === me.slug && !roomed.has(r.a)) : [];
 
   // koga mogu odabrati: svi koji nemaju cimera (i oni koji se još nisu prijavili)
   const candidates = useMemo(
     () =>
       me
         ? [...people.values()]
-            .filter((p) => p.slug !== me.slug && !roomed.has(p.slug) && !inviting.has(p.slug))
+            .filter((p) => p.slug !== me.slug && !roomed.has(p.slug) && !inviting.has(p.slug) && !skipping.has(p.slug))
             .sort((x, y) => Number(going.has(y.slug)) - Number(going.has(x.slug)) || byName(x, y))
         : [],
-    [me, people, roomed, inviting, going]
+    [me, people, roomed, inviting, going, skipping]
   );
-  const free = attendees.filter((a) => !roomed.has(a.slug) && !inviting.has(a.slug)).sort(byName);
+  const free = attendees.filter((a) => !roomed.has(a.slug) && !inviting.has(a.slug) && !skipping.has(a.slug)).sort(byName);
+  const noRoom = attendees.filter((a) => skipping.has(a.slug) && !roomed.has(a.slug)).sort(byName);
   const roomCount = list.filter((r) => !r.pending).length;
 
   const run = async (fn) => {
@@ -149,6 +153,21 @@ export default function Smjestaj({ attendees, path, navigate }) {
                 </button>
               </div>
             </>
+          ) : mySkip ? (
+            <>
+              <span className="skip-house" aria-hidden="true">
+                🏠
+              </span>
+              <h2>Ne trebaš smještaj</h2>
+              <p className="my-room-text">
+                Zabilježeno! Ne tražimo ti sobu ni cimera. Ako se predomisliš, samo klikni ispod.
+              </p>
+              <div className="trip-actions">
+                <button type="button" className="btn-ghost" disabled={busy} onClick={() => run(() => unskipRoom(me.slug))}>
+                  Ipak trebam smještaj
+                </button>
+              </div>
+            </>
           ) : (
             <>
               {incoming.map((r) => (
@@ -182,6 +201,12 @@ export default function Smjestaj({ attendees, path, navigate }) {
                 empty="Trenutno nema slobodnih cimera. 🙂"
                 note={(p) => (going.has(p.slug) ? '' : '📨 dobit će poziv')}
               />
+              <div className="skip-row">
+                <span>Spavaš doma ili si već sredio/la smještaj?</span>
+                <button type="button" className="btn-ghost" disabled={busy} onClick={() => run(() => skipRoom(me.slug))}>
+                  🏠 Ne trebam smještaj
+                </button>
+              </div>
             </>
           )}
           {error && <p className="error">{error}</p>}
@@ -263,6 +288,19 @@ export default function Smjestaj({ attendees, path, navigate }) {
             <h2>Još bez cimera ({free.length})</h2>
             <div className="waiting-row">
               {free.map((p) => (
+                <span key={p.slug} className="waiting-item" title={p.name}>
+                  <Avatar person={p} size={40} snow={false} />
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {data !== null && noRoom.length > 0 && (
+          <div className="waiting-list">
+            <h2>Ne trebaju smještaj ({noRoom.length}) 🏠</h2>
+            <div className="waiting-row">
+              {noRoom.map((p) => (
                 <span key={p.slug} className="waiting-item" title={p.name}>
                   <Avatar person={p} size={40} snow={false} />
                 </span>

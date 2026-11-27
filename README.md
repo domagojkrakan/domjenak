@@ -8,10 +8,23 @@ Landing stranica za prijavu na božićni domjenak — **četvrtak, 10. prosinca 
 - Stranica **/popis** („Tko dolazi?”) prikazuje sve prijavljene, ukupan broj i tko se još nije javio. Gumb je uvijek gore desno.
 - Tko nije na popisu, može upisati ime i prezime ručno.
 - Dolazak se može otkazati klikom na svoje ime na popisu (ili „Ipak ne mogu doći” na početnoj) — uz poruku „Žao nam je!”.
-- **/smjestaj** — prijavljeni biraju cimera (po dvoje u sobi). Nakon odabira oboje „padnu” na jastuke bračnog kreveta i navuče se deka. Cimer može biti i netko tko se još nije prijavio: on dobiva zahtjev za sobu čim se prijavi (prihvati / odbij). Ispod su kartice soba, tablica „tko je s kim” sa statusom i popis onih koji još nemaju cimera.
+- **/smjestaj** — prijavljeni biraju cimera (po dvoje u sobi). Nakon odabira oboje „padnu” na jastuke bračnog kreveta i navuče se deka. Cimer može biti i netko tko se još nije prijavio: on dobiva zahtjev za sobu čim se prijavi (prihvati / odbij). Tko spava doma ili je sam sredio smještaj klikne **🏠 Ne trebam smještaj** (može se predomisliti). Ispod su kartice soba, tablica „tko je s kim” sa statusom, popis onih koji još nemaju cimera i onih koji ne trebaju smještaj.
 - **/prijevoz** — tko ima auto, ponudi vožnju (grad polaska, koliko kolega može povesti — autom 1–4, a uz gumb 🚐 Kombi do 7, vrijeme, napomena) i može dodati kolege; prijavljeni odmah sjedaju, a neprijavljeni dobivaju poziv kad se prijave. Ostali „uskoče u saonice” ili kliknu **Trebam prijevoz**: odaberu grad u kojem su i dodaju napomenu, pa „vise u zraku” na balonima dok ih netko ne pokupi. Vozač vidi tko treba prijevoz (prvo oni iz njegovog grada) i povede ih jednim klikom (**Povezi 🛷**). Ispod je tablica svih vožnji.
 - Kad pozvana osoba otvori stranicu nakon prijave, dolje iskoči obavijest „X te poziva…” s gumbom do sobe/prijevoza.
-- Stranica pamti tko si (nakon prijave ili odabirom „Tko si ti?”). Kad netko otkaže dolazak, automatski se makne iz sobe i iz vožnji.
+- Stranica pamti tko si (nakon prijave ili odabirom „Tko si ti?”). Kad netko otkaže dolazak, automatski se makne iz sobe, iz vožnji (ako vozi, vožnja se otkazuje), iz poziva, zahtjeva za prijevoz i popisa „ne treba smještaj”.
+- Potvrde (otkaži vožnju, raskini sobu…) su prozori u stilu stranice, ne preglednikovi.
+
+## Za developera — ukratko
+
+- **Nema baze podataka.** Svi podaci su u dvije JSON datoteke u mapi `DATA_DIR` (zadano `.data/`, nije u gitu):
+  `rsvp.json` (prijave) i `kv.json` (sobe, vožnje, pozivi…). Kod koji ih čita/piše je u `lib/kv.js` i `lib/store.js`.
+  (Ako postoji varijabla `BLOB_READ_WRITE_TOKEN`, isti kod umjesto datoteka koristi Vercel Blob — vidi dolje zašto to ne preporučujemo.)
+- **Repozitorij sadrži sve što treba** — kod, fotografije zaposlenika (`Ljudi/` → `public/ljudi/`), glazbu. Nema tajnih ključeva ni `.env` datoteka.
+- **Razvoj:** `npm install` pa `npm run dev` (Vite na http://localhost:5173, API radi kroz isti server).
+- **Produkcija:** `npm install && npm run build && npm start` (ili gotov zip — vidi „Vlastiti hosting”).
+- **Prijenos na drugi server** = kopiraj kod + mapu s podacima (`DATA_DIR`). Ništa drugo ne treba.
+- Za Claude Code je u repozitoriju `CLAUDE.md` s opisom arhitekture i pravila.
+
 
 ## Pokretanje lokalno
 
@@ -71,6 +84,7 @@ Smještaj i prijevoz su u istom Blob storeu:
 - `seat/<vozač>--<putnik>.json` — putnik u vožnji
 - `need/<osoba>--<id>.json` — zahtjev „trebam prijevoz” { city, note } (briše se kad osoba sjedne u vožnju ili ponudi svoju)
 - `invite-room/<od>--<za>.json`, `invite-ride/<vozač>--<za>.json` — pozivi koji čekaju potvrdu
+- `noroom/<osoba>.json` — osoba ne treba smještaj
 
 Lokalno se sve sprema u `.data/`.
 
@@ -92,7 +106,11 @@ npm run people
 - `src/pages/Smjestaj.jsx` + `src/components/Bed.jsx` — sobe i animacija kreveta
 - `src/pages/Prijevoz.jsx` + `src/components/RideSleigh.jsx` — vožnje i saonice; `src/components/Floater.jsx` — osoba na balonima koja čeka prijevoz
 - `src/components/InviteToast.jsx` — obavijest o pozivu za sobu/vožnju
-- `api/rsvp.js`, `api/rooms.js`, `api/rides.js` + `lib/` — API (Vercel funkcije; lokalno ih poslužuje Vite)
+- `src/components/ConfirmHost.jsx` — potvrde u stilu stranice (`ask({...})` umjesto `window.confirm`)
+- `src/usePoll.js` — osvježavanje podataka (samo dok je kartica vidljiva)
+- `api/rsvp.js`, `api/rooms.js`, `api/rides.js` — API handleri (isti kod radi u `server.js`, u Vite dev serveru i kao Vercel funkcije)
+- `lib/trips.js` — pravila za sobe i vožnje; `lib/store.js` — prijave; `lib/kv.js` + `lib/datadir.js` — spremanje podataka
+- `server.js` — produkcijski Node server; `scripts/pack-hosting.sh` — zip za hosting; `scripts/import-live.mjs` — prijenos prijava sa stare adrese
 
 ## Glazba i reper Djed Božićnjak
 

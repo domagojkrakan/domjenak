@@ -2,7 +2,7 @@
 
 Landing stranica za prijavu na božićni domjenak — **četvrtak, 10. prosinca 2026., Zadar, HQ ured**.
 
-- Ilustrirani zimski Zadar u sumrak (Sv. Donat, zvonik Sv. Stošije, Velebit, Pozdrav suncu, riva) sa snijegom i saonicama koje lete nebom.
+- Ilustrirani zimski Zadar u sumrak (Sv. Donat, zvonik Sv. Stošije, Velebit, riva) sa snijegom i saonicama koje lete nebom.
 - Zaposlenik počne upisivati ime → iskoči padajući izbornik s okruglim fotografijama (sa snijegom na vrhu) → odabere sebe → klikne **„Dolazim!”**.
 - Djed Božićnjak doleti saonicama, viče „Ho ho ho!”, pokupi osobu u saonice i odleti, a zatim se prikaže poruka „Vidimo se na božićnom domjenku!”.
 - Stranica **/popis** („Tko dolazi?”) prikazuje sve prijavljene, ukupan broj i tko se još nije javio. Gumb je uvijek gore desno.

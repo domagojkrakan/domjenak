@@ -7,7 +7,7 @@ const SNOW = [
 ];
 
 // Bračni krevet s dvoje cimera na jastucima. `play` = animacija (padnu na jastuke, navuče se deka).
-export default function Bed({ a, b, play = false, className = '' }) {
+export default function Bed({ a, b, play = false, pending = false, className = '' }) {
   const drop = (i) =>
     play
       ? {
@@ -50,7 +50,12 @@ export default function Bed({ a, b, play = false, className = '' }) {
         {a && <Avatar person={a} size={80} snow={false} className="avatar-fluid" />}
       </motion.div>
       <motion.div className="bed-head right" {...drop(1)}>
-        {b && <Avatar person={b} size={80} snow={false} className="avatar-fluid" />}
+        {b && <Avatar person={b} size={80} snow={false} className="avatar-fluid" muted={pending} />}
+        {b && pending && (
+          <span className="bed-pending" title="Čeka potvrdu">
+            📨
+          </span>
+        )}
       </motion.div>
 
       {/* prednji dio: deka */}

@@ -24,7 +24,16 @@ export default function RideSleigh({ people, seats = 4, play = false, className 
                 }
               : {})}
           >
-            {p ? <Avatar person={p} size={60} snow={false} className="avatar-fluid" /> : <span className="rs-empty">+</span>}
+            {p ? (
+              <Avatar person={p} size={60} snow={false} className="avatar-fluid" muted={p.pending} />
+            ) : (
+              <span className="rs-empty">+</span>
+            )}
+            {p?.pending && (
+              <span className="rs-pending" title="Čeka potvrdu">
+                📨
+              </span>
+            )}
             {i === 0 && p && (
               <span className="rs-wheel" aria-label="vozač" title="Vozač">
                 🚗

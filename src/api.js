@@ -64,8 +64,10 @@ const post = (url, body) =>
   call(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 
 // ---------- smještaj ----------
-export const fetchRooms = () => call('/api/rooms').then((d) => d.rooms);
+export const fetchRooms = () => call('/api/rooms'); // { rooms, invites }
 export const pairRoom = (me, mate) => post('/api/rooms', { me, mate });
+export const acceptRoom = (me, from) => post('/api/rooms', { action: 'accept', me, from });
+export const declineRoom = (me, from) => post('/api/rooms', { action: 'decline', me, from });
 export const leaveRoom = (me) => call(`/api/rooms?slug=${encodeURIComponent(me)}`, { method: 'DELETE' });
 
 // ---------- prijevoz ----------
@@ -74,6 +76,9 @@ export const createRide = (ride) => post('/api/rides', { action: 'create', ...ri
 export const joinRide = (me, driver) => post('/api/rides', { action: 'join', me, driver });
 export const leaveRide = (me) => post('/api/rides', { action: 'leave', me });
 export const cancelRide = (me) => post('/api/rides', { action: 'cancel', me });
+export const declineRide = (me, driver) => post('/api/rides', { action: 'decline', me, driver });
+export const inviteToRide = (me, who) => post('/api/rides', { action: 'invite', me, who });
+export const dropFromRide = (me, who) => post('/api/rides', { action: 'drop', me, who });
 
 // "1 mjesto", "2 mjesta", "5 mjesta"
 export function mjesta(n) {

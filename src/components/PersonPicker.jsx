@@ -3,7 +3,7 @@ import Avatar from './Avatar.jsx';
 import { normalize } from '../api.js';
 
 // Mreža osoba s tražilicom — za "tko si ti" i za izbor cimera.
-export default function PersonPicker({ people, onPick, placeholder = 'Upiši ime…', empty = 'Nema nikoga za odabrati.', busy }) {
+export default function PersonPicker({ people, onPick, placeholder = 'Upiši ime…', empty = 'Nema nikoga za odabrati.', busy, note }) {
   const [q, setQ] = useState('');
   const shown = useMemo(() => {
     const words = normalize(q).split(/\s+/).filter(Boolean);
@@ -31,6 +31,7 @@ export default function PersonPicker({ people, onPick, placeholder = 'Upiši ime
               <button type="button" className="picker-item" onClick={() => onPick(p)} disabled={busy}>
                 <Avatar person={p} size={64} snow={false} />
                 <span>{p.name}</span>
+                {note?.(p) && <small className="picker-note">{note(p)}</small>}
               </button>
             </li>
           ))}

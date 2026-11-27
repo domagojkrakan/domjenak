@@ -20,7 +20,7 @@ const RIG = {
   ho: { x: 0, y: '-10vh', rotate: 0, scale: 1 },
   pickup: { x: 0, y: '-10vh', rotate: 0, scale: 1 },
   away: { x: '120vw', y: '-85vh', rotate: -14, scale: 0.5, transition: { duration: 1.7, ease: [0.55, 0, 0.8, 0.4] } },
-  done: { x: '120vw', y: '-85vh', rotate: -14, scale: 0.5 },
+  done: { x: '120vw', y: '-85vh', rotate: -14, scale: 0.5, transition: { duration: 0 } },
 };
 
 const at = (phase, list) => list.includes(phase);
@@ -31,12 +31,20 @@ export default function SuccessAnimation({ person, already, onShowList, navigate
   const [seated, setSeated] = useState(reduced);
   const flyRef = useRef(null);
   const seatRef = useRef(null);
+  const timers = useRef([]);
 
   useEffect(() => {
     if (reduced) return;
-    const timers = TIMELINE.map(([p, ms]) => setTimeout(() => setPhase(p), ms));
-    return () => timers.forEach(clearTimeout);
+    timers.current = TIMELINE.map(([p, ms]) => setTimeout(() => setPhase(p), ms));
+    return () => timers.current.forEach(clearTimeout);
   }, [reduced]);
+
+  // Preskoči: zaustavi sve preostale faze, inače bi se animacija nastavila iza završne kartice.
+  const skip = () => {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
+    setPhase('done');
+  };
 
   useEffect(() => {
     if (phase === 'done') setSeated(true);
@@ -184,7 +192,7 @@ export default function SuccessAnimation({ person, already, onShowList, navigate
       </AnimatePresence>
 
       {phase !== 'done' && (
-        <button className="skip" onClick={() => setPhase('done')}>
+        <button className="skip" onClick={skip}>
           Preskoči
         </button>
       )}

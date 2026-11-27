@@ -14,6 +14,7 @@ import Attendees from './pages/Attendees.jsx';
 import Smjestaj from './pages/Smjestaj.jsx';
 import Prijevoz from './pages/Prijevoz.jsx';
 import SubNav from './components/SubNav.jsx';
+import InviteToast from './components/InviteToast.jsx';
 import { fetchAttendees } from './api.js';
 
 function usePath() {
@@ -108,6 +109,8 @@ export default function App() {
           <CancelDialog key="cancel" person={cancelFor} onCancelled={onCancelled} onClose={() => setCancelFor(null)} />
         )}
       </AnimatePresence>
+
+      <InviteToast attendees={attendees} path={path} navigate={navigate} />
 
       <footer className="foot">Sretan Božić i uspješnu Novu godinu! ✦ Rentlio tim</footer>
     </>

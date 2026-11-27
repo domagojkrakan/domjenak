@@ -4,10 +4,22 @@ import { AnimatePresence, motion } from 'framer-motion';
 import SubNav from '../components/SubNav.jsx';
 import MeBar, { useGoingMe } from '../components/MeBar.jsx';
 import Avatar from '../components/Avatar.jsx';
-import CroatiaMap from '../components/CroatiaMap.jsx';
 import RideSleigh from '../components/RideSleigh.jsx';
+import PersonPicker from '../components/PersonPicker.jsx';
+import { byName, everyone } from '../everyone.js';
 import { CITIES, CITY_BY_ID } from '../../lib/cities.js';
-import { cancelRide, createRide, fetchRides, firstName, joinRide, leaveRide, mjesta } from '../api.js';
+import {
+  cancelRide,
+  createRide,
+  declineRide,
+  dropFromRide,
+  fetchRides,
+  firstName,
+  inviteToRide,
+  joinRide,
+  leaveRide,
+  mjesta,
+} from '../api.js';
 
 const CITY_OPTIONS = [...CITIES].sort((a, b) => a.name.localeCompare(b.name, 'hr'));
 const cityName = (id) => CITY_BY_ID.get(id)?.name || id;
@@ -87,8 +99,8 @@ export default function Prijevoz({ attendees, path, navigate }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [offering, setOffering] = useState(false);
-  const [active, setActive] = useState(null);
-  const [party, setParty] = useState(null); // vožnja za animaciju
+  const [adding, setAdding] = useState(false);
+  const [party, setParty] = useState(null); // vozač čije saonice slavimo
 
   const load = useCallback(async () => {
     try {
@@ -106,30 +118,45 @@ export default function Prijevoz({ attendees, path, navigate }) {
     return () => clearInterval(id);
   }, [load]);
 
-  const bySlug = useMemo(() => new Map(attendees.map((a) => [a.slug, a])), [attendees]);
+  const going = useMemo(() => new Set(attendees.map((a) => a.slug)), [attendees]);
+  const people = useMemo(() => everyone(attendees), [attendees]);
   const list = useMemo(
     () =>
       (rides || [])
-        .filter((r) => bySlug.has(r.driver))
+        .filter((r) => going.has(r.driver))
         .map((r) => {
-          const passengers = r.passengers.map((s) => bySlug.get(s)).filter(Boolean);
-          return { ...r, D: bySlug.get(r.driver), P: passengers, free: Math.max(0, r.seats - 1 - passengers.length) };
+          const P = r.passengers.filter((s) => going.has(s)).map((s) => people.get(s));
+          const I = r.invited.filter((s) => people.has(s)).map((s) => ({ ...people.get(s), pending: true }));
+          return { ...r, D: people.get(r.driver), P, I, all: [people.get(r.driver), ...P, ...I], free: Math.max(0, r.seats - 1 - P.length - I.length) };
         }),
-    [rides, bySlug]
+    [rides, going, people]
   );
   const myDrive = me && list.find((r) => r.driver === me.slug);
   const myRide = me && !myDrive && list.find((r) => r.passengers.includes(me.slug));
+  const incoming = me && !myDrive && !myRide ? list.filter((r) => r.invited.includes(me.slug)) : [];
   const seated = useMemo(() => new Set(list.flatMap((r) => [r.driver, ...r.P.map((p) => p.slug)])), [list]);
-  const walking = attendees.filter((a) => !seated.has(a.slug));
+  const invitedAny = useMemo(() => new Set(list.flatMap((r) => r.invited)), [list]);
+  const walking = attendees.filter((a) => !seated.has(a.slug)).sort(byName);
   const freeSeats = list.reduce((n, r) => n + r.free, 0);
+
+  // koga vozač može dodati: svi koji još nemaju prijevoz (i oni koji se nisu prijavili)
+  const candidates = useMemo(
+    () =>
+      myDrive
+        ? [...people.values()]
+            .filter((p) => !seated.has(p.slug) && !myDrive.invited.includes(p.slug))
+            .sort((x, y) => Number(going.has(y.slug)) - Number(going.has(x.slug)) || byName(x, y))
+        : [],
+    [myDrive, people, seated, going]
+  );
 
   const act = async (fn, after) => {
     setBusy(true);
     setError('');
     try {
       await fn();
-      const fresh = await load();
-      after?.(fresh);
+      await load();
+      after?.();
     } catch (e) {
       setError(e.message);
       load();
@@ -137,17 +164,8 @@ export default function Prijevoz({ attendees, path, navigate }) {
       setBusy(false);
     }
   };
-
-  const join = (r) =>
-    act(
-      () => joinRide(me.slug, r.driver),
-      (fresh) => setParty((fresh || []).find((x) => x.driver === r.driver) || r)
-    );
-
-  const partyView = party && {
-    ...party,
-    people: [party.driver, ...party.passengers].map((s) => bySlug.get(s)).filter(Boolean),
-  };
+  const join = (r) => act(() => joinRide(me.slug, r.driver), () => setParty(r.driver));
+  const partyRide = party && list.find((r) => r.driver === party);
 
   return (
     <main className="list-page trip-page">
@@ -163,12 +181,8 @@ export default function Prijevoz({ attendees, path, navigate }) {
         </p>
         <h1>Saonice za Zadar 🛷</h1>
         <p className="list-hint">
-          Imaš auto? Ponudi prijevoz. Nemaš? Uskoči nekome u saonice. Svi idemo u isti smjer: Zadar! 🎄
+          Imaš auto? Ponudi prijevoz i pozovi kolege. Nemaš? Uskoči nekome u saonice. Svi idemo u Zadar! 🎄
         </p>
-      </motion.header>
-
-      <div className="map-wrap">
-        <CroatiaMap rides={list} active={active} onSelect={(d) => setActive((a) => (a === d ? null : d))} />
         <div className="map-legend">
           <span>
             <b>{list.length}</b> {list.length === 1 ? 'vožnja' : list.length >= 2 && list.length <= 4 ? 'vožnje' : 'vožnji'}
@@ -180,7 +194,7 @@ export default function Prijevoz({ attendees, path, navigate }) {
             <b>{walking.length}</b> još bez prijevoza
           </span>
         </div>
-      </div>
+      </motion.header>
 
       <MeBar attendees={attendees} navigate={navigate} />
 
@@ -190,14 +204,58 @@ export default function Prijevoz({ attendees, path, navigate }) {
           {myDrive ? (
             <>
               <h2>Tvoja vožnja: {cityName(myDrive.city)} → Zadar 🚗</h2>
-              <RideSleigh people={[myDrive.D, ...myDrive.P]} seats={myDrive.seats} />
-              <p className="my-room-text">
-                {myDrive.P.length
-                  ? `S tobom idu: ${myDrive.P.map((p) => firstName(p.name)).join(', ')}.`
-                  : 'Još nitko nije uskočio. Javi kolegama da imaš mjesta!'}{' '}
-                {myDrive.free > 0 && `Još ${myDrive.free} ${mjesta(myDrive.free)}.`}
-              </p>
+              <RideSleigh people={myDrive.all} seats={myDrive.seats} />
+              {myDrive.P.length + myDrive.I.length > 0 ? (
+                <ul className="crew">
+                  {[...myDrive.P, ...myDrive.I].map((p) => (
+                    <li key={p.slug} className={p.pending ? 'pending' : ''}>
+                      <Avatar person={p} size={30} snow={false} muted={p.pending} />
+                      <span className="crew-name">
+                        {p.name}
+                        {p.pending && <small>{going.has(p.slug) ? ' · čeka potvrdu' : ' · čeka prijavu'}</small>}
+                      </span>
+                      <button
+                        type="button"
+                        className="crew-x"
+                        title={p.pending ? 'Povuci poziv' : 'Makni iz saonica'}
+                        disabled={busy}
+                        onClick={() => window.confirm(`Maknuti osobu ${p.name} iz saonica?`) && act(() => dropFromRide(me.slug, p.slug))}
+                      >
+                        ✕
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="my-room-text">Još nitko nije uskočio. Pozovi kolege!</p>
+              )}
+              {myDrive.free > 0 &&
+                (adding ? (
+                  <div className="crew-add">
+                    <h3>Dodaj kolegu u saonice</h3>
+                    <p className="muted">Prijavljeni odmah sjedaju, a ostali dobivaju poziv kad se prijave.</p>
+                    <PersonPicker
+                      people={candidates}
+                      busy={busy}
+                      placeholder="Upiši ime kolege…"
+                      note={(p) => (going.has(p.slug) ? '' : '📨 dobit će poziv')}
+                      onPick={(p) => act(() => inviteToRide(me.slug, p.slug), () => setAdding(false))}
+                    />
+                    <button type="button" className="link" onClick={() => setAdding(false)}>
+                      Gotovo
+                    </button>
+                  </div>
+                ) : (
+                  <p className="my-room-text">
+                    Još {myDrive.free} {mjesta(myDrive.free)}.
+                  </p>
+                ))}
               <div className="trip-actions">
+                {myDrive.free > 0 && !adding && (
+                  <button type="button" className="btn-primary" onClick={() => setAdding(true)}>
+                    + Dodaj kolegu
+                  </button>
+                )}
                 <button
                   type="button"
                   className="btn-ghost danger"
@@ -210,11 +268,9 @@ export default function Prijevoz({ attendees, path, navigate }) {
             </>
           ) : myRide ? (
             <>
-              <h2>
-                Voziš se: {cityName(myRide.city)} → Zadar 🛷
-              </h2>
+              <h2>Voziš se: {cityName(myRide.city)} → Zadar 🛷</h2>
               <p className="muted">Vozač: {myRide.D.name}</p>
-              <RideSleigh people={[myRide.D, ...myRide.P]} seats={myRide.seats} />
+              <RideSleigh people={myRide.all} seats={myRide.seats} />
               {myRide.when && <p className="my-room-text">Polazak: {myRide.when}</p>}
               <div className="trip-actions">
                 <button
@@ -234,9 +290,8 @@ export default function Prijevoz({ attendees, path, navigate }) {
                 me={me}
                 onDone={async () => {
                   setOffering(false);
-                  const fresh = await load();
-                  const mine = (fresh || []).find((r) => r.driver === me.slug);
-                  if (mine) setParty(mine);
+                  await load();
+                  setParty(me.slug);
                 }}
               />
               <button type="button" className="link" onClick={() => setOffering(false)}>
@@ -245,12 +300,29 @@ export default function Prijevoz({ attendees, path, navigate }) {
             </>
           ) : (
             <>
+              {incoming.map((r) => (
+                <div key={r.driver} className="invite-box">
+                  <Avatar person={r.D} size={56} snow={false} />
+                  <p>
+                    <strong>{r.D.name}</strong> te poziva u saonice: {cityName(r.city)} → Zadar! 🛷
+                    {r.when && <small> Polazak: {r.when}</small>}
+                  </p>
+                  <div className="invite-actions">
+                    <button type="button" className="btn-primary" disabled={busy} onClick={() => join(r)}>
+                      Uskoči
+                    </button>
+                    <button type="button" className="btn-ghost" disabled={busy} onClick={() => act(() => declineRide(me.slug, r.driver))}>
+                      Odbij
+                    </button>
+                  </div>
+                </div>
+              ))}
               <h2>Kako ideš u Zadar?</h2>
               <div className="trip-choice">
                 <button type="button" className="choice-btn" onClick={() => setOffering(true)}>
                   <span aria-hidden="true">🚗</span>
                   <b>Imam auto</b>
-                  <small>Ponudi slobodna mjesta</small>
+                  <small>Ponudi mjesta i pozovi kolege</small>
                 </button>
                 <a href="#voznje" className="choice-btn">
                   <span aria-hidden="true">🙋</span>
@@ -277,23 +349,21 @@ export default function Prijevoz({ attendees, path, navigate }) {
             <ul className="ride-grid">
               {list.map((r, i) => {
                 const mine = myDrive === r || myRide === r;
-                const canJoin = me && !myDrive && !myRide && r.free > 0;
+                const canJoin = me && !myDrive && !myRide && (r.free > 0 || r.invited.includes(me.slug));
                 return (
                   <motion.li
                     key={r.driver}
-                    className={`ride-card ${mine ? 'mine' : ''} ${active === r.driver ? 'active' : ''}`}
+                    className={`ride-card ${mine ? 'mine' : ''}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: Math.min(i, 12) * 0.05 }}
-                    onMouseEnter={() => setActive(r.driver)}
-                    onMouseLeave={() => setActive(null)}
                   >
                     <div className="ride-route">
                       <b>{cityName(r.city)}</b>
                       <span className="ride-arrow" aria-hidden="true" />
                       <b>Zadar</b>
                     </div>
-                    <RideSleigh people={[r.D, ...r.P]} seats={r.seats} className="small" />
+                    <RideSleigh people={r.all} seats={r.seats} className="small" />
                     <p className="ride-driver">
                       Vozi <strong>{r.D.name}</strong>
                     </p>
@@ -335,7 +405,11 @@ export default function Prijevoz({ attendees, path, navigate }) {
                       </td>
                       <td>{cityName(r.city)} → Zadar</td>
                       <td>{r.when || '—'}</td>
-                      <td>{r.P.length ? r.P.map((p) => p.name).join(', ') : '—'}</td>
+                      <td>
+                        {r.P.length + r.I.length
+                          ? [...r.P.map((p) => p.name), ...r.I.map((p) => `${p.name} (čeka)`)].join(', ')
+                          : '—'}
+                      </td>
                       <td>
                         {r.free}/{r.seats - 1}
                       </td>
@@ -352,7 +426,7 @@ export default function Prijevoz({ attendees, path, navigate }) {
             <h2>Još bez prijevoza ({walking.length})</h2>
             <div className="waiting-row">
               {walking.map((p) => (
-                <span key={p.slug} className="waiting-item" title={p.name}>
+                <span key={p.slug} className="waiting-item" title={invitedAny.has(p.slug) ? `${p.name} · ima poziv` : p.name}>
                   <Avatar person={p} size={40} snow={false} />
                 </span>
               ))}
@@ -362,40 +436,40 @@ export default function Prijevoz({ attendees, path, navigate }) {
       </section>
 
       {createPortal(
-      <AnimatePresence>
-        {partyView && (
-          <motion.div
-            key="ride-party"
-            className="trip-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setParty(null)}
-          >
+        <AnimatePresence>
+          {partyRide && (
             <motion.div
-              className="trip-modal"
-              initial={{ scale: 0.8, y: 30 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 220, damping: 20 }}
-              onClick={(e) => e.stopPropagation()}
+              key="ride-party"
+              className="trip-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setParty(null)}
             >
-              <div className="trip-modal-road">
-                <RideSleigh people={partyView.people} seats={partyView.seats} play />
-              </div>
-              <motion.h2 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.8 }}>
-                {partyView.driver === me?.slug ? 'Saonice su spremne! 🚗' : 'Uskočio si u saonice! 🛷'}
-              </motion.h2>
-              <motion.p className="muted" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.2 }}>
-                {cityName(partyView.city)} → Zadar. Vežite pojaseve, sobovi kreću! 🦌
-              </motion.p>
-              <button type="button" className="btn-primary" onClick={() => setParty(null)}>
-                Super!
-              </button>
+              <motion.div
+                className="trip-modal"
+                initial={{ scale: 0.8, y: 30 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 220, damping: 20 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="trip-modal-road">
+                  <RideSleigh people={partyRide.all} seats={partyRide.seats} play />
+                </div>
+                <motion.h2 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.8 }}>
+                  {partyRide.driver === me?.slug ? 'Saonice su spremne! 🚗' : 'Dobrodošao/la u saonice! 🛷'}
+                </motion.h2>
+                <motion.p className="muted" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.2 }}>
+                  {cityName(partyRide.city)} → Zadar. Vežite pojaseve, sobovi kreću! 🦌
+                </motion.p>
+                <button type="button" className="btn-primary" onClick={() => setParty(null)}>
+                  Super!
+                </button>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>,
+          )}
+        </AnimatePresence>,
         document.body
       )}
     </main>

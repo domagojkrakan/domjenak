@@ -2346,87 +2346,13 @@ h1 {
   font-size: 18px;
 }
 
-/* karta */
-.map-wrap {
-  max-width: 760px;
-  margin: 0 auto 30px;
-}
-.hr-map {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: 24px;
-  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-}
-.map-route-line {
-  fill: none;
-  stroke: #ffd166;
-  stroke-width: 3;
-  stroke-dasharray: 8 7;
-  stroke-linecap: round;
-  animation: routeDash 1.2s linear infinite;
-}
-.map-route-glow {
-  fill: none;
-  stroke: rgba(255, 209, 102, 0.25);
-  stroke-width: 10;
-  stroke-linecap: round;
-}
-.map-route.active .map-route-line {
-  stroke: #fff;
-  stroke-width: 4;
-}
-.map-route.active .map-route-glow {
-  stroke: rgba(255, 255, 255, 0.35);
-  stroke-width: 14;
-}
-@keyframes routeDash {
-  to { stroke-dashoffset: -15; }
-}
-.map-city circle {
-  fill: #0e3151;
-  stroke: #fff;
-  stroke-width: 1.5;
-}
-.map-city text {
-  font: 700 12px var(--font);
-  fill: #2a4a73;
-  paint-order: stroke;
-  stroke: rgba(255, 255, 255, 0.85);
-  stroke-width: 3px;
-}
-.map-city.on circle {
-  fill: #e5383b;
-  stroke: #ffd166;
-  stroke-width: 2.5;
-}
-.map-city.on text {
-  font-size: 13px;
-  font-weight: 800;
-  fill: #b3122a;
-}
-.map-dest-label {
-  font: 800 18px var(--display);
-  fill: #b3122a;
-  paint-order: stroke;
-  stroke: #fff;
-  stroke-width: 4px;
-}
-.map-dest {
-  animation: destPulse 2s ease-in-out infinite;
-  transform-box: fill-box;
-  transform-origin: center;
-}
-@keyframes destPulse {
-  50% { scale: 1.08; }
-}
+/* brojke */
 .map-legend {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 16px;
 }
 .map-legend span {
   padding: 6px 14px;
@@ -2501,7 +2427,178 @@ h1 {
   font-size: 13px;
 }
 
+/* pozivi */
+.picker-note {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gold);
+}
+.bed-pending,
+.rs-pending {
+  position: absolute;
+  z-index: 3;
+  right: -6%;
+  top: -8%;
+  font-size: 22px;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
+  animation: wiggle 1.4s ease-in-out infinite;
+}
+.rs-pending {
+  font-size: 16px;
+}
+.room-card.pending {
+  border-style: dashed;
+  opacity: 0.85;
+}
+.status {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.status.ok {
+  background: rgba(169, 207, 58, 0.2);
+  color: #d8f08a;
+}
+.status.pending {
+  background: rgba(255, 209, 102, 0.18);
+  color: var(--gold);
+}
+.invite-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px 14px;
+  margin: 4px 0 22px;
+  padding: 16px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255, 209, 102, 0.2), rgba(255, 209, 102, 0.08));
+  border: 2px solid var(--gold);
+  animation: invitePulse 2s ease-in-out infinite;
+}
+.invite-box .avatar {
+  margin-top: 0;
+}
+.invite-box p {
+  flex: 1 1 220px;
+  margin: 0;
+  text-align: left;
+  font-size: 17px;
+}
+.invite-box small {
+  display: block;
+  color: rgba(236, 246, 255, 0.75);
+}
+.invite-actions {
+  display: flex;
+  gap: 8px;
+}
+@keyframes invitePulse {
+  50% { box-shadow: 0 0 0 6px rgba(255, 209, 102, 0.15); }
+}
+.crew {
+  list-style: none;
+  margin: 14px auto 0;
+  padding: 0;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.crew li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px 6px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  text-align: left;
+}
+.crew li .avatar {
+  margin-top: 0;
+}
+.crew-name {
+  flex: 1;
+  font-weight: 700;
+}
+.crew li small {
+  font-weight: 600;
+  color: var(--gold);
+}
+.crew-x {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(229, 56, 59, 0.25);
+  color: #ffc2c4;
+  font-weight: 800;
+}
+.crew-x:hover {
+  background: rgba(229, 56, 59, 0.5);
+}
+.crew-add {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.2);
+}
+.crew-add h3 {
+  margin: 0 0 4px;
+  font-family: var(--display);
+  font-size: 20px;
+}
+.invite-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(560px, calc(100vw - 24px));
+  padding: 12px 14px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #2b3a9c, #18226b);
+  border: 2px solid var(--gold);
+  box-shadow: 0 24px 50px -12px rgba(0, 0, 0, 0.7);
+}
+.invite-toast .avatar {
+  margin-top: 0;
+}
+.invite-toast p {
+  flex: 1;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.3;
+}
+.invite-toast .btn-primary {
+  padding: 10px 16px;
+  white-space: nowrap;
+}
+.invite-toast-icon {
+  position: absolute;
+  left: -10px;
+  top: -14px;
+  font-size: 26px;
+  animation: wiggle 1.2s ease-in-out infinite;
+}
+.invite-toast-x {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
 @media (max-width: 720px) {
+  .invite-toast { flex-wrap: wrap; }
+  .invite-toast p { flex: 1 1 60%; font-size: 14px; }
+  .invite-toast .btn-primary { flex: 1; }
   .subnav { gap: 2px; padding: 4px; }
   .subnav a { padding: 9px 11px; font-size: 13px; }
   .trip-choice { grid-template-columns: 1fr; }

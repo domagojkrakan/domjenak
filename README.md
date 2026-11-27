@@ -42,3 +42,9 @@ npm run people
 - `src/components/SuccessAnimation.jsx` — animacija nakon prijave
 - `src/pages/Attendees.jsx` — popis „Tko dolazi?”
 - `api/rsvp.js` + `lib/store.js` — API (Vercel funkcija; lokalno ga poslužuje Vite)
+
+## Glazba i reper Djed Božićnjak
+
+- Pjesma je u `public/audio/bozicna.m4a` (uvod sa zvončićima je izrezan) i vrti se u krug. Zvonce gore desno je utišava i pali.
+- Djed ušeće u ekran, zagrijava se dok traje uvod, a od 0:27 repa. Usta mu prate vokal (`src/rapEnvelope.js`, izračunato iz snimke), glava ritam (~90 BPM), a dijelovi pjesme su u `src/rap.js`.
+- **Stihovi koji izlijeću iz Djeda:** upiši ih u `public/audio/bozicna.lrc` iza vremenskih oznaka (jedan red = jedan takt, ~2,7 s). Prazni redovi = Djed izbacuje svoje upadice. Vremena se po potrebi mogu pomaknuti.

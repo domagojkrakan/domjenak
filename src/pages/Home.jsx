@@ -38,8 +38,8 @@ export default function Home({ attendees, onRegistered, navigate, onCancel }) {
             Božićni <span className="h1-accent">domjenak</span>
           </h1>
           <div className="meta">
-            <span className="chip">📅 Četvrtak, 10.12.</span>
-            <span className="chip">📍 Zadar · HQ ured</span>
+            <span className="chip chip-red">📅 Četvrtak, 10.12.</span>
+            <span className="chip chip-green">📍 Zadar · HQ ured</span>
           </div>
           <Countdown />
           <p className="lead">

@@ -5,6 +5,7 @@ import Sleigh from './components/Sleigh.jsx';
 import Ornaments from './components/Ornaments.jsx';
 import Logo from './components/Logo.jsx';
 import Music from './components/Music.jsx';
+import RapSanta from './components/RapSanta.jsx';
 import CancelDialog from './components/CancelDialog.jsx';
 import { AnimatePresence } from 'framer-motion';
 import Home from './pages/Home.jsx';
@@ -62,6 +63,7 @@ export default function App() {
         <Snow />
       </div>
       <Ornaments />
+      <RapSanta />
 
       <nav className="topbar">
         <a

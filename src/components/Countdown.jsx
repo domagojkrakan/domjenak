@@ -34,6 +34,12 @@ export default function Countdown() {
     <div className="countdown" role="timer" aria-label={`Još ${d} ${dana(d)} do domjenka`}>
       {cells.map(([v, label], i) => (
         <div key={label} className="cd-cell">
+          <svg className="cd-bow" viewBox="0 0 60 26" aria-hidden="true">
+            <path d="M30 20 Q14 0 6 8 Q0 18 30 20 Z" fill="#FFD45E" />
+            <path d="M30 20 Q46 0 54 8 Q60 18 30 20 Z" fill="#FFD45E" />
+            <path d="M30 20 Q18 6 11 10M30 20 Q42 6 49 10" stroke="#C9821A" strokeWidth="1.6" fill="none" />
+            <circle cx="30" cy="19" r="5" fill="#F5B728" stroke="#C9821A" strokeWidth="1.2" />
+          </svg>
           <span className="cd-num" key={i === 3 ? v : undefined}>
             {v}
           </span>

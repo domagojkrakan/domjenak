@@ -1659,7 +1659,9 @@ h1 {
   font-weight: 800;
   font-size: 14px;
   line-height: 1.25;
-  white-space: nowrap;
+  width: max-content;
+  white-space: normal;
+  text-wrap: balance;
   box-shadow: 0 8px 24px rgba(5, 10, 40, 0.35);
   animation: bubbleIn 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
 }
@@ -1709,6 +1711,19 @@ h1 {
 }
 .bm-part {
   transform-box: view-box;
+}
+.baba-bubble {
+  right: auto;
+  left: 52%;
+  top: -4%;
+  border-radius: 18px 18px 18px 4px;
+  color: #7a1fa2;
+}
+.baba-bubble::after {
+  right: auto;
+  left: -7px;
+  border-left-color: transparent;
+  border-right-color: #fff;
 }
 @media (max-width: 720px) {
   .rap-santa { width: 96px; right: 2px; }

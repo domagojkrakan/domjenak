@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { audio } from '../music.js';
-import { HOOK_START, beatAt, sectionAt, vocalAt } from '../rap.js';
+import { BABA_JOKES, HOOK_START, beatAt, jokeAt, sectionAt, vocalAt } from '../rap.js';
 
 const ROLL = 2.6; // sekunde dok se dokotrlja
 const ENTER_AT = HOOK_START - ROLL - 0.3; // stigne točno kad krene refren
@@ -10,6 +10,7 @@ const ENTER_AT = HOOK_START - ROLL - 0.3; // stigne točno kad krene refren
 export default function BabaMraz() {
   const parts = useRef({});
   const r = (name) => (el) => (parts.current[name] = el);
+  const [bubble, setBubble] = useState('');
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -19,6 +20,13 @@ export default function BabaMraz() {
     let enteredAt = -1;
     let wheel = 0;
     let last = performance.now();
+    let lastBubble = '';
+    const say = (txt) => {
+      if (txt !== lastBubble) {
+        lastBubble = txt;
+        setBubble(txt);
+      }
+    };
 
     const tick = () => {
       raf = requestAnimationFrame(tick);
@@ -39,15 +47,16 @@ export default function BabaMraz() {
       const moving = clock - enteredAt < ROLL;
 
       const sec = sectionAt(t).name;
-      const { index: beat, phase } = beatAt(t);
+      const { index: beat, phase, bar } = beatAt(t);
       const hit = Math.pow(1 - phase, 3);
 
-      let head = 0, headY = 0, body = 0, wheelie = 0, spin = 1, armMic = 0, armFree = -10, target = 0;
+      let head = 0, headY = 0, body = 0, wheelie = 0, spin = 1, armMic = 0, armFree = -10, target = 0, finger = 0;
+      let line = '';
 
       if (moving) {
         wheel += (inside ? 1 : -1) * 260 * dt;
         body = -4;
-        armFree = -60 + Math.sin(clock * 8) * 20; // maše dok ulazi
+        armFree = 85 + Math.sin(clock * 8) * 20; // maše dok ulazi
       } else if (!inside) {
         // izvan ekrana
       } else if (sec === 'hook') {
@@ -56,27 +65,34 @@ export default function BabaMraz() {
         headY = hit * 5;
         head = Math.sin((beat + phase) * Math.PI * 0.5) * 6;
         body = Math.sin((beat + phase) * Math.PI * 0.5) * 3;
-        armFree = -150 + Math.sin((beat + phase) * Math.PI) * 20;
+        armFree = 135 + Math.sin((beat + phase) * Math.PI) * 15;
         armMic = -hit * 5;
       } else if (sec === 'rap') {
         // đuska dok Djed repa: kimanje, wheelie na udarac, okret svaka 4 takta
         headY = hit * 7;
         head = (beat % 2 ? -1 : 1) * (4 + hit * 6);
         wheelie = -hit * 7 - (beat % 4 === 2 ? Math.sin(phase * Math.PI) * 6 : 0);
-        armFree = (beat % 2 ? -150 : -110) + hit * 15;
+        armFree = (beat % 2 ? 135 : 100) - hit * 15;
         armMic = Math.sin((beat + phase) * Math.PI) * 10;
+        line = jokeAt(BABA_JOKES, bar, beat);
         const cycle = beat % 16;
-        if (cycle >= 14) {
+        if (bar % 10 === 3 && beat % 4 >= 1 && beat % 4 <= 2) {
+          // rijetko: srednji prst Djedu
+          armFree = 140;
+          finger = 1;
+        } else if (cycle >= 14) {
           const s = (cycle - 14 + phase) / 2; // dva udarca za cijeli okret
           spin = Math.cos(s * Math.PI * 2);
           wheel += 300 * dt;
         }
       } else {
         // outro: maše
-        armFree = -150 + Math.sin(clock * 9) * 16;
+        armFree = 135 + Math.sin(clock * 9) * 15;
         head = Math.sin(clock * 2) * 5;
         headY = hit * 2;
+        line = 'Ne kasnite na domjenak! 💃';
       }
+      say(inside && !moving ? line : '');
 
       amp += (target - amp) * 0.45;
       if (p.mouth) p.mouth.style.transform = `scaleY(${0.12 + amp * 0.95})`;
@@ -88,6 +104,7 @@ export default function BabaMraz() {
       if (p.caster) p.caster.style.transform = `rotate(${wheel * 3}deg)`;
       if (p.armMic) p.armMic.style.transform = `rotate(${armMic}deg)`;
       if (p.armFree) p.armFree.style.transform = `rotate(${armFree}deg)`;
+      if (p.finger) p.finger.style.opacity = finger;
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
@@ -95,6 +112,11 @@ export default function BabaMraz() {
 
   return (
     <div ref={r('root')} className="baba-mraz" aria-hidden="true">
+      {bubble && (
+        <span className="rap-bubble baba-bubble" key={bubble}>
+          {bubble}
+        </span>
+      )}
       <svg className="baba-svg" viewBox="0 0 240 270">
         <defs>
           <linearGradient id="bm-gold" x1="0" y1="0" x2="1" y2="1">
@@ -138,6 +160,7 @@ export default function BabaMraz() {
                 <path d="M96 112q-6 22 6 38" stroke="url(#bm-coat)" strokeWidth="15" strokeLinecap="round" fill="none" />
                 <circle cx="103" cy="152" r="7.5" fill="#fff" />
                 <circle cx="104" cy="160" r="6.5" fill="#F3C3A0" />
+                <path ref={r('finger')} d="M104.5 165l2 11" stroke="#F3C3A0" strokeWidth="4" strokeLinecap="round" style={{ opacity: 0 }} />
               </g>
 
               {/* tijelo: crvena hoodica s krznom */}

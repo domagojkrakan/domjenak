@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { audio, playMusic, useMusic } from '../music.js';
-import { WARMUP_LINES, beatAt, sectionAt, vocalAt } from '../rap.js';
+import { SANTA_JOKES, WARMUP_LINES, beatAt, jokeAt, sectionAt, vocalAt } from '../rap.js';
 
 const WALK_MS = 5200;
 const rot = (el, deg) => el && (el.style.transform = `rotate(${deg}deg)`);
@@ -56,6 +56,7 @@ export default function RapSanta() {
 
       let head = 0, headY = 0, torso = 0, torsoY = 0, armFree = -8, armMic = 0, legL = 0, legR = 0;
       let target = 0;
+      let finger = 0;
 
       if (walkingNow) {
         const s = Math.sin(clock * Math.PI * 3.2);
@@ -93,11 +94,16 @@ export default function RapSanta() {
           torso = sway * 6;
           head = sway * 6;
           headY = hit * 4;
-          armFree = -140 + Math.sin((beat + phase) * Math.PI) * 22;
-          say('');
+          armFree = -125 + Math.sin((beat + phase) * Math.PI) * 15;
+          say(jokeAt(SANTA_JOKES, bar, beat));
+          // rijetko: srednji prst Babi
+          if (bar % 10 === 7 && beat % 4 >= 1 && beat % 4 <= 2) {
+            armFree = -140;
+            finger = 1;
+          }
         } else {
           // outro: mahanje
-          armFree = -150 + Math.sin(clock * 9) * 16;
+          armFree = -128 + Math.sin(clock * 9) * 14;
           head = Math.sin(clock * 2) * 4;
           headY = hit * 2;
           say('Vidimo se 10.12.! ✌️');
@@ -109,6 +115,7 @@ export default function RapSanta() {
       if (p.head) p.head.style.transform = `translateY(${headY}px) rotate(${head}deg)`;
       if (p.torso) p.torso.style.transform = `translateY(${torsoY}px) rotate(${torso}deg)`;
       rot(p.armFree, armFree);
+      if (p.finger) p.finger.style.opacity = finger;
       rot(p.armMic, armMic);
       rot(p.legL, legL);
       rot(p.legR, legR);
@@ -178,6 +185,7 @@ export default function RapSanta() {
             <circle cx="150" cy="192" r="8.5" fill="#fff" />
             <circle cx="151" cy="200" r="7.5" fill="#1f1f24" />
             <path d="M147 196l-2-7M151 195v-8" stroke="#1f1f24" strokeWidth="4" strokeLinecap="round" />
+            <path ref={r('finger')} d="M152 205l3 13" stroke="#1f1f24" strokeWidth="4.6" strokeLinecap="round" style={{ opacity: 0 }} />
           </g>
 
           {/* hoodica */}

@@ -2817,3 +2817,107 @@ h1 {
 .ride-sleigh.van .rs-seats {
   margin-bottom: -4%;
 }
+
+/* odabir broja kolega + kombi */
+.seat-row {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+.seat-row .seat-toggle {
+  flex: 1;
+}
+.van-btn {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  min-width: 72px;
+  padding: 0 10px;
+  border-radius: 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.1;
+  transition: background 0.2s, border-color 0.2s;
+}
+.van-btn span {
+  font-size: 22px;
+}
+.van-btn small {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.van-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.van-btn.on {
+  border-style: solid;
+  border-color: var(--gold);
+  background: rgba(255, 209, 102, 0.16);
+  color: #fff;
+}
+.seat-note {
+  margin: 10px 0 0;
+  padding: 9px 12px;
+  border-radius: 12px;
+  background: rgba(255, 209, 102, 0.1);
+  border: 1px solid rgba(255, 209, 102, 0.35);
+  font-size: 0.88rem;
+  line-height: 1.4;
+  text-align: left;
+}
+@media (max-width: 520px) {
+  .seat-row {
+    gap: 8px;
+  }
+  .van-btn {
+    min-width: 58px;
+    border-radius: 12px;
+  }
+}
+
+/* potvrda u stilu aplikacije (umjesto window.confirm) */
+.confirm-overlay {
+  z-index: 80;
+}
+.confirm-modal {
+  position: relative;
+  width: min(420px, 100%);
+  padding-top: 34px;
+}
+.confirm-modal .card-snow {
+  top: -14px;
+}
+.confirm-icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  border-radius: 50%;
+  font-size: 32px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.confirm-modal h2 {
+  font-size: 26px;
+}
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.confirm-actions button {
+  flex: 1 1 140px;
+  min-height: 50px;
+}
+.confirm-actions button {
+  padding: 12px 14px;
+  white-space: nowrap;
+}

@@ -6,6 +6,7 @@ import MeBar, { useGoingMe } from '../components/MeBar.jsx';
 import PersonPicker from '../components/PersonPicker.jsx';
 import Avatar from '../components/Avatar.jsx';
 import Bed from '../components/Bed.jsx';
+import { ask } from '../components/ConfirmHost.jsx';
 import { acceptRoom, declineRoom, fetchRooms, firstName, leaveRoom, pairRoom } from '../api.js';
 import { byName, everyone } from '../everyone.js';
 
@@ -88,9 +89,11 @@ export default function Smjestaj({ attendees, path, navigate }) {
     const res = await run(() => acceptRoom(me.slug, r.a));
     if (res?.room) setParty({ a: me, b: r.A });
   };
-  const leave = () => {
-    const q = mate ? `Sigurno želiš raskinuti sobu s osobom ${mate.name}?` : `Povući poziv za osobu ${myInvite.B.name}?`;
-    if (window.confirm(q)) run(() => leaveRoom(me.slug));
+  const leave = async () => {
+    const q = mate
+      ? { title: 'Raskinuti sobu?', text: `${mate.name} će ostati bez cimera.`, ok: 'Raskini sobu', cancel: 'Ne, ostajemo' }
+      : { title: 'Povući poziv?', text: `${myInvite.B.name} više neće dobiti zahtjev za sobu.`, ok: 'Povuci poziv' };
+    if (await ask({ icon: '🛏️', danger: true, ...q })) run(() => leaveRoom(me.slug));
   };
 
   return (

@@ -7,6 +7,7 @@ import Avatar from '../components/Avatar.jsx';
 import RideSleigh from '../components/RideSleigh.jsx';
 import PersonPicker from '../components/PersonPicker.jsx';
 import Floater from '../components/Floater.jsx';
+import { ask } from '../components/ConfirmHost.jsx';
 import { byName, everyone } from '../everyone.js';
 import { CITIES, CITY_BY_ID } from '../../lib/cities.js';
 import {
@@ -30,7 +31,16 @@ const byAt = (x, y) => x.at.localeCompare(y.at);
 
 function OfferForm({ me, onDone, needs = [] }) {
   const [city, setCity] = useState('');
-  const [seats, setSeats] = useState(4);
+  const [mates, setMates] = useState(3); // koliko kolega vozač vodi (bez sebe)
+  const [van, setVan] = useState(false);
+  const seats = mates + 1;
+  const toggleVan = () => {
+    setVan((v) => {
+      if (v && mates > 4) setMates(4);
+      if (!v && mates < 5) setMates(7);
+      return !v;
+    });
+  };
   const [when, setWhen] = useState('');
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
@@ -72,21 +82,38 @@ function OfferForm({ me, onDone, needs = [] }) {
         </p>
       )}
       <div className="offer-seats">
-        <span>Koliko nas ide u auto (s tobom)? Kombi = 8 (7+1) 🚐</span>
-        <div className="seat-toggle" role="radiogroup">
-          {[2, 3, 4, 5, 6, 7, 8].map((n) => (
-            <button
-              key={n}
-              type="button"
-              role="radio"
-              aria-checked={seats === n}
-              className={seats === n ? 'on' : ''}
-              onClick={() => setSeats(n)}
-            >
-              {n}
-            </button>
-          ))}
+        <span>Koliko kolega možeš povesti sa sobom?</span>
+        <div className="seat-row">
+          <div className="seat-toggle" role="radiogroup">
+            {(van ? [1, 2, 3, 4, 5, 6, 7] : [1, 2, 3, 4]).map((n) => (
+              <button
+                key={n}
+                type="button"
+                role="radio"
+                aria-checked={mates === n}
+                className={mates === n ? 'on' : ''}
+                onClick={() => setMates(n)}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            className={`van-btn ${van ? 'on' : ''}`}
+            aria-pressed={van}
+            onClick={toggleVan}
+            title="Imam kombi (do 7 kolega)"
+          >
+            <span aria-hidden="true">🚐</span>
+            <small>Kombi</small>
+          </button>
         </div>
+        {!van && mates === 4 && (
+          <p className="seat-note">
+            🛋️ Za 4 kolege treba ti veći auto. Pripazi da se troje straga ne stišće, neka i njima bude udobno do Zadra!
+          </p>
+        )}
       </div>
       <label>
         <span>Polazak</span>
@@ -258,7 +285,7 @@ export default function Prijevoz({ attendees, path, navigate }) {
         transition={{ duration: 0.7, ease: [0.2, 0.8, 0.2, 1] }}
       >
         <p className="eyebrow">
-          <span className="dot" /> Prijevoz · auto do 4, kombi do 8 osoba
+          <span className="dot" /> Prijevoz · auto ili kombi, svi do Zadra
         </p>
         <h1>Saonice za Zadar 🛷</h1>
         <p className="list-hint">
@@ -300,7 +327,10 @@ export default function Prijevoz({ attendees, path, navigate }) {
                         className="crew-x"
                         title={p.pending ? 'Povuci poziv' : 'Makni iz saonica'}
                         disabled={busy}
-                        onClick={() => window.confirm(`Maknuti osobu ${p.name} iz saonica?`) && act(() => dropFromRide(me.slug, p.slug))}
+                        onClick={async () =>
+                          (await ask({ icon: '🛷', title: `Maknuti ${firstName(p.name)} iz saonica?`, text: `${p.name} će ostati bez prijevoza.`, ok: 'Makni', danger: true })) &&
+                          act(() => dropFromRide(me.slug, p.slug))
+                        }
                       >
                         ✕
                       </button>
@@ -326,7 +356,7 @@ export default function Prijevoz({ attendees, path, navigate }) {
                           </small>
                         </span>
                         <button type="button" className="btn-primary" disabled={busy} onClick={() => pickup(n)}>
-                          Poveži 🛷
+                          Povezi 🛷
                         </button>
                       </li>
                     ))}
@@ -364,7 +394,10 @@ export default function Prijevoz({ attendees, path, navigate }) {
                   type="button"
                   className="btn-ghost danger"
                   disabled={busy}
-                  onClick={() => window.confirm('Sigurno otkazuješ vožnju? Putnici će ostati bez prijevoza.') && act(() => cancelRide(me.slug))}
+                  onClick={async () =>
+                    (await ask({ icon: '🚗', title: 'Otkazati vožnju?', text: 'Putnici će ostati bez prijevoza do Zadra.', ok: 'Otkaži vožnju', cancel: 'Ne, vozim', danger: true })) &&
+                    act(() => cancelRide(me.slug))
+                  }
                 >
                   Otkaži vožnju
                 </button>
@@ -381,7 +414,10 @@ export default function Prijevoz({ attendees, path, navigate }) {
                   type="button"
                   className="btn-ghost danger"
                   disabled={busy}
-                  onClick={() => window.confirm('Sigurno izlaziš iz saonica?') && act(() => leaveRide(me.slug))}
+                  onClick={async () =>
+                    (await ask({ icon: '🛷', title: 'Izaći iz saonica?', text: 'Mjesto će se osloboditi za nekog drugog.', ok: 'Izađi', cancel: 'Ostajem', danger: true })) &&
+                    act(() => leaveRide(me.slug))
+                  }
                 >
                   Izađi iz saonica
                 </button>
@@ -492,7 +528,7 @@ export default function Prijevoz({ attendees, path, navigate }) {
               <Floater key={n.slug} person={n.P} city={cityName(n.city)} note={n.note} index={i}>
                 {myDrive && myDrive.free > 0 && !myDrive.invited.includes(n.slug) && (
                   <button type="button" className="btn-primary floater-btn" disabled={busy} onClick={() => pickup(n)}>
-                    Poveži 🛷
+                    Povezi 🛷
                   </button>
                 )}
               </Floater>

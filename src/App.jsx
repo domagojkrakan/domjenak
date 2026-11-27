@@ -15,6 +15,7 @@ import Smjestaj from './pages/Smjestaj.jsx';
 import Prijevoz from './pages/Prijevoz.jsx';
 import SubNav from './components/SubNav.jsx';
 import InviteToast from './components/InviteToast.jsx';
+import ConfirmHost from './components/ConfirmHost.jsx';
 import { fetchAttendees } from './api.js';
 
 function usePath() {
@@ -111,6 +112,7 @@ export default function App() {
       </AnimatePresence>
 
       <InviteToast attendees={attendees} path={path} navigate={navigate} />
+      <ConfirmHost />
 
       <footer className="foot">Sretan Božić i uspješnu Novu godinu! ✦ Rentlio tim</footer>
     </>

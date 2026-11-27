@@ -26,7 +26,7 @@ const cityName = (id) => CITY_BY_ID.get(id)?.name || id;
 
 function OfferForm({ me, onDone }) {
   const [city, setCity] = useState('');
-  const [seats, setSeats] = useState(4);
+  const [seats, setSeats] = useState(3);
   const [when, setWhen] = useState('');
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);

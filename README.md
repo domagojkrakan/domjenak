@@ -22,7 +22,41 @@ npm run dev
 
 Lokalno se prijave spremaju u `.data/rsvp.json` (nije u gitu).
 
+## Vlastiti hosting (Node.js) — preporučeno
+
+Stranica radi kao jedan mali Node server (`server.js`, Node 18+, bez dodatnih paketa) koji poslužuje
+izgrađenu stranicu i API, a podatke sprema u JSON datoteke. Nema vanjske baze ni limita.
+
+**Najlakše — gotov paket:** `bash scripts/pack-hosting.sh` napravi `release/domjenak-hosting.zip`
+(izgrađena stranica + server + postojeće prijave). Na hostingu:
+
+```bash
+unzip domjenak-hosting.zip && cd domjenak-hosting
+PORT=3000 node server.js
+```
+
+U cPanelu („Setup Node.js App”): *Application root* = mapa gdje je raspakirano, *Startup file* = `server.js`,
+Node 18 ili noviji, pa **Start**. Port postavlja sam hosting (varijabla `PORT`), domenu povežeš u istom ekranu.
+Na VPS-u server drži upaljen npr. `pm2 start server.js --name domjenak` iza nginxa (proxy na port 3000).
+
+**Iz repozitorija:** `npm install && npm run build && npm start`.
+
+Varijable:
+
+- `PORT` — port (zadano 3000), `HOST` — adresa (zadano 0.0.0.0)
+- `DATA_DIR` — mapa s podacima (zadano `./.data`). Postavi je izvan mape aplikacije
+  (npr. `/home/korisnik/domjenak-data`) da nova verzija ne pregazi prijave. Za sigurnosnu kopiju dovoljno je kopirati tu mapu.
+
+Podaci: `rsvp.json` (prijave) i `kv.json` (sobe, vožnje, pozivi, zahtjevi za prijevoz — isti ključevi kao dolje).
+Izmjene se obrađuju jedna po jedna, pa istovremene prijave ne mogu pregaziti jedna drugu.
+Prijave s Vercela prebaciš s `node scripts/import-live.mjs https://rentlio-domjenak-chi.vercel.app`.
+
+Stranice osvježavaju podatke svakih 45–60 s i samo dok je kartica otvorena.
+
 ## Objava na Vercel
+
+> Besplatni Vercel Blob ima 2.000 „naprednih” operacija mjesečno (upis i listanje). Kad se potroše,
+> Vercel blokira store na 30 dana i prijave prestanu raditi — zato je vlastiti hosting bolji izbor.
 
 1. Importaj repozitorij na [vercel.com](https://vercel.com/new) (framework se prepozna kao Vite).
 2. U projektu: **Storage → Create → Blob** i poveži store s projektom — Vercel sam doda `BLOB_READ_WRITE_TOKEN`.

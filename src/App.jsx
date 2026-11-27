@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import usePoll from './usePoll.js';
 import ZadarScene from './components/ZadarScene.jsx';
 import Snow from './components/Snow.jsx';
 import Sleigh from './components/Sleigh.jsx';
@@ -50,11 +51,7 @@ export default function App() {
     }
   }, []);
 
-  useEffect(() => {
-    load();
-    const id = setInterval(load, 20000);
-    return () => clearInterval(id);
-  }, [load]);
+  usePoll(load, 45000);
 
   const [cancelFor, setCancelFor] = useState(null);
   const onCancelled = (slug) => setAttendees((list) => list.filter((a) => a.slug !== slug));

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import usePoll from '../usePoll.js';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import SubNav from '../components/SubNav.jsx';
@@ -24,11 +25,7 @@ export default function Smjestaj({ attendees, path, navigate }) {
       setData((d) => d || { rooms: [], invites: [] });
     }
   }, []);
-  useEffect(() => {
-    load();
-    const id = setInterval(load, 20000);
-    return () => clearInterval(id);
-  }, [load]);
+  usePoll(load, 45000);
 
   const going = useMemo(() => new Set(attendees.map((a) => a.slug)), [attendees]);
   const people = useMemo(() => everyone(attendees), [attendees]);

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import usePoll from '../usePoll.js';
 import { AnimatePresence, motion } from 'framer-motion';
 import Avatar from './Avatar.jsx';
 import { useGoingMe } from './MeBar.jsx';
@@ -29,12 +30,7 @@ export default function InviteToast({ attendees, path, navigate }) {
       /* pokušat ćemo opet */
     }
   }, []);
-  useEffect(() => {
-    if (!me) return;
-    load();
-    const id = setInterval(load, 20000);
-    return () => clearInterval(id);
-  }, [me, load, path]);
+  usePoll(load, 60000, [path], Boolean(me));
 
   const people = useMemo(() => everyone(attendees), [attendees]);
   const going = useMemo(() => new Set(attendees.map((a) => a.slug)), [attendees]);

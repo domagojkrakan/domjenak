@@ -20,7 +20,7 @@ function osoba(n) {
   return 'osoba dolazi';
 }
 
-export default function Attendees({ attendees, loading, navigate }) {
+export default function Attendees({ attendees, loading, navigate, onCancel }) {
   const sorted = useMemo(() => [...attendees].sort((a, b) => a.name.localeCompare(b.name, 'hr')), [attendees]);
   const going = useMemo(() => new Set(attendees.map((a) => a.slug)), [attendees]);
   const waiting = PEOPLE.filter((p) => !going.has(p.slug));
@@ -48,6 +48,7 @@ export default function Attendees({ attendees, loading, navigate }) {
             <small>od {total} kolega na popisu</small>
           </span>
         </div>
+        <p className="list-hint">Ipak ne možeš doći? Klikni na svoje ime i otkaži dolazak.</p>
         <div className="garland" aria-hidden="true">
           <div className="garland-fill" style={{ width: `${pct}%` }} />
           {Array.from({ length: 24 }, (_, i) => (
@@ -70,13 +71,17 @@ export default function Attendees({ attendees, loading, navigate }) {
           {sorted.map((a, i) => (
             <motion.li
               key={a.slug}
-              className="person"
+              layout
               initial={{ opacity: 0, y: 24, scale: 0.85 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
               transition={{ delay: 0.25 + Math.min(i, 30) * 0.04, type: 'spring', stiffness: 220, damping: 18 }}
             >
-              <Avatar person={a} size={96} />
-              <span className="person-name">{a.name}</span>
+              <button type="button" className="person" onClick={() => onCancel(a)} title="Klikni za otkazivanje dolaska">
+                <Avatar person={a} size={96} />
+                <span className="person-name">{a.name}</span>
+                <span className="person-cancel">Otkaži dolazak</span>
+              </button>
             </motion.li>
           ))}
         </ul>

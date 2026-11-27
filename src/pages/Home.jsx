@@ -5,7 +5,7 @@ import SuccessAnimation from '../components/SuccessAnimation.jsx';
 import Countdown from '../components/Countdown.jsx';
 import { rsvp } from '../api.js';
 
-export default function Home({ attendees, onRegistered, navigate }) {
+export default function Home({ attendees, onRegistered, navigate, onCancel }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(null); // { person, already }
@@ -42,8 +42,7 @@ export default function Home({ attendees, onRegistered, navigate }) {
           </div>
           <Countdown />
           <p className="lead">
-            Godina je bila velika — red je da je zajedno i zaključimo! 🎄 Javi nam da dolaziš, a sve dodatne
-            informacije stižu uskoro.
+            Ho-ho-ho! 🎄 Javi nam da dolaziš, a sve dodatne informacije stižu uskoro.
           </p>
         </motion.section>
 
@@ -56,6 +55,7 @@ export default function Home({ attendees, onRegistered, navigate }) {
               busy={busy}
               error={error}
               onShowList={() => navigate('/popis')}
+              onCancel={onCancel}
             />
           )}
         </AnimatePresence>

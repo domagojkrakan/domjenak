@@ -3,6 +3,9 @@ import ZadarScene from './components/ZadarScene.jsx';
 import Snow from './components/Snow.jsx';
 import Sleigh from './components/Sleigh.jsx';
 import Ornaments from './components/Ornaments.jsx';
+import Logo from './components/Logo.jsx';
+import CancelDialog from './components/CancelDialog.jsx';
+import { AnimatePresence } from 'framer-motion';
 import Home from './pages/Home.jsx';
 import Attendees from './pages/Attendees.jsx';
 import { fetchAttendees } from './api.js';
@@ -44,6 +47,9 @@ export default function App() {
     return () => clearInterval(id);
   }, [load]);
 
+  const [cancelFor, setCancelFor] = useState(null);
+  const onCancelled = (slug) => setAttendees((list) => list.filter((a) => a.slug !== slug));
+
   const onRegistered = (entry) =>
     setAttendees((list) => (list.some((a) => a.slug === entry.slug) ? list : [...list, entry]));
 
@@ -65,14 +71,7 @@ export default function App() {
             navigate('/');
           }}
         >
-          <span className="brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 32 32">
-              <circle cx="16" cy="16" r="15" fill="#009FE3" />
-              <path d="M10 23 V13 a6 6 0 0 1 12 0" stroke="#fff" strokeWidth="3.4" fill="none" strokeLinecap="round" />
-              <circle cx="22" cy="21" r="2.6" fill="#A9CF3A" />
-            </svg>
-          </span>
-          <span className="brand-word">rentlio</span>
+          <Logo className="brand-logo" />
           <span className="brand-sub">božićni domjenak</span>
         </a>
         {isList ? (
@@ -89,10 +88,16 @@ export default function App() {
       </nav>
 
       {isList ? (
-        <Attendees attendees={attendees} loading={loading} navigate={navigate} />
+        <Attendees attendees={attendees} loading={loading} navigate={navigate} onCancel={setCancelFor} />
       ) : (
-        <Home attendees={attendees} onRegistered={onRegistered} navigate={navigate} />
+        <Home attendees={attendees} onRegistered={onRegistered} navigate={navigate} onCancel={setCancelFor} />
       )}
+
+      <AnimatePresence>
+        {cancelFor && (
+          <CancelDialog key="cancel" person={cancelFor} onCancelled={onCancelled} onClose={() => setCancelFor(null)} />
+        )}
+      </AnimatePresence>
 
       <footer className="foot">Sretan Božić i uspješnu Novu godinu! ✦ Rentlio tim</footer>
     </>

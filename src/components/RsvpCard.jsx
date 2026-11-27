@@ -8,7 +8,7 @@ function slugify(s) {
   return normalize(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
-export default function RsvpCard({ attendees, onSubmit, busy, error, onShowList }) {
+export default function RsvpCard({ attendees, onSubmit, busy, error, onShowList, onCancel }) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
@@ -66,9 +66,6 @@ export default function RsvpCard({ attendees, onSubmit, busy, error, onShowList 
       transition={{ duration: 0.7, ease: [0.2, 0.8, 0.2, 1], delay: 0.15 }}
     >
       <div className="card-snow" aria-hidden="true" />
-      <label className="field-label" htmlFor="who">
-        Tko si ti?
-      </label>
 
       <AnimatePresence mode="wait" initial={false}>
         {!selected ? (
@@ -79,6 +76,7 @@ export default function RsvpCard({ attendees, onSubmit, busy, error, onShowList 
               </span>
               <input
                 id="who"
+                aria-label="Upiši svoje ime i prezime"
                 ref={inputRef}
                 autoComplete="off"
                 placeholder="Počni upisivati ime i prezime…"
@@ -146,9 +144,9 @@ export default function RsvpCard({ attendees, onSubmit, busy, error, onShowList 
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ type: 'spring', stiffness: 260, damping: 20 }}
           >
-            <motion.div layoutId="picked-avatar" className="selected-avatar">
+            <div className="selected-avatar">
               <Avatar person={selected} size={92} />
-            </motion.div>
+            </div>
             <div className="selected-text">
               <strong>{selected.name}</strong>
               <button
@@ -171,9 +169,14 @@ export default function RsvpCard({ attendees, onSubmit, busy, error, onShowList 
           <p>
             🎉 {firstName(selected.name)}, već si na popisu! Vidimo se 10.12.
           </p>
-          <button type="button" className="btn-ghost" onClick={onShowList}>
-            Pogledaj tko sve dolazi →
-          </button>
+          <div className="already-actions">
+            <button type="button" className="btn-ghost" onClick={onShowList}>
+              Pogledaj tko sve dolazi →
+            </button>
+            <button type="button" className="btn-cancel-link" onClick={() => onCancel(selected)}>
+              Ipak ne mogu doći
+            </button>
+          </div>
         </div>
       ) : (
         <button type="button" className="gift-btn" disabled={!selected || busy} onClick={() => onSubmit(selected)}>

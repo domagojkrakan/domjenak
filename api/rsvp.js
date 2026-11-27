@@ -1,6 +1,7 @@
 // GET  /api/rsvp  -> { attendees: [...] }
 // POST /api/rsvp  { slug } ili { name }  -> { entry, already }
-import { listAttendees, addAttendee } from '../lib/store.js';
+// DELETE /api/rsvp?slug=ime-prezime  -> { removed, slug }
+import { listAttendees, addAttendee, removeAttendee } from '../lib/store.js';
 
 function send(res, status, data) {
   res.statusCode = status;
@@ -27,7 +28,11 @@ export default async function handler(req, res) {
       const body = await readBody(req);
       return send(res, 200, await addAttendee(body));
     }
-    res.setHeader('Allow', 'GET, POST');
+    if (req.method === 'DELETE') {
+      const slug = new URL(req.url, 'http://localhost').searchParams.get('slug');
+      return send(res, 200, await removeAttendee(slug));
+    }
+    res.setHeader('Allow', 'GET, POST, DELETE');
     return send(res, 405, { error: 'Metoda nije podržana.' });
   } catch (err) {
     console.error(err);

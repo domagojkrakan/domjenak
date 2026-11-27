@@ -401,7 +401,8 @@ h1 {
   font-size: 17px;
   line-height: 1.55;
   color: rgba(245, 247, 255, 0.92);
-  max-width: 46ch;
+  max-width: 62ch;
+  text-wrap: balance;
   text-shadow: 0 2px 10px rgba(10, 10, 50, 0.5);
 }
 
@@ -836,7 +837,31 @@ h1 {
 }
 .rig-bob {
   position: relative;
-  animation: bob 1.4s ease-in-out infinite;
+  animation: rigBob 1.4s ease-in-out infinite;
+}
+.rig-bob.steady {
+  animation-play-state: paused;
+}
+@keyframes rigBob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 6px; }
+}
+.seat {
+  opacity: 0;
+}
+.seat.seated {
+  opacity: 1;
+}
+.waiting-avatar .avatar {
+  margin-top: 0;
+}
+.waiting-glow,
+.waiting-name {
+  transition: opacity 0.3s;
+}
+.waiting-glow.fade,
+.waiting-name.fade {
+  opacity: 0;
 }
 .sleigh-big {
   filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.45));
@@ -1054,8 +1079,8 @@ h1 {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, 160px);
+  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 30px 18px;
 }
@@ -1066,7 +1091,7 @@ h1 {
   gap: 14px;
   padding: 22px 10px 18px;
   border-radius: 22px;
-  background: rgba(9, 33, 66, 0.5);
+  background: rgba(24, 30, 88, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -1141,8 +1166,6 @@ h1 {
     padding: 26px 18px 20px;
   }
   .people-grid {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    justify-content: stretch;
     gap: 22px 12px;
   }
   .ho-bubble {
@@ -1194,5 +1217,136 @@ h1 {
   }
   .cd-num {
     font-size: 26px;
+  }
+}
+
+/* ---------- logo ---------- */
+.brand-logo {
+  height: 28px;
+  width: auto;
+  display: block;
+  color: #fff;
+}
+
+/* ---------- otkazivanje ---------- */
+.already-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.btn-cancel-link {
+  padding: 4px 8px;
+  border: 0;
+  background: none;
+  color: rgba(255, 200, 205, 0.9);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.btn-danger {
+  padding: 14px 22px;
+  border-radius: 14px;
+  border: 0;
+  font-weight: 800;
+  font-size: 16px;
+  color: #fff;
+  background: linear-gradient(180deg, #ff6b6e, #e5383b);
+  box-shadow: 0 10px 24px -8px rgba(229, 56, 59, 0.8);
+  transition: transform 0.2s;
+}
+.btn-danger:hover {
+  transform: translateY(-2px);
+}
+.btn-danger:disabled,
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(14, 18, 66, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.cancel-card h2 {
+  margin-top: 16px;
+}
+.sad-avatar {
+  position: relative;
+  display: inline-block;
+}
+.sad-tear {
+  position: absolute;
+  left: 22%;
+  top: 46%;
+  font-size: 22px;
+  animation: tear 1.6s ease-in infinite;
+}
+@keyframes tear {
+  0% { opacity: 0; translate: 0 -6px; }
+  30% { opacity: 1; }
+  100% { opacity: 0; translate: 0 26px; }
+}
+.melting img {
+  filter: grayscale(0.6) brightness(0.9);
+  transition: filter 1s;
+}
+.melting .snowcap {
+  animation: melt 1.6s ease-in forwards;
+}
+@keyframes melt {
+  to { translate: 0 18%; opacity: 0; scale: 1 0.6; }
+}
+.sad-title {
+  color: #9fdcff;
+}
+.list-hint {
+  margin: -8px 0 22px;
+  font-size: 14px;
+  color: rgba(236, 246, 255, 0.7);
+}
+.people-grid > li {
+  display: flex;
+  width: 160px;
+}
+@media (max-width: 720px) {
+  .people-grid > li {
+    width: calc(50% - 6px);
+  }
+}
+.person {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+.person-cancel {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffb3b5;
+  opacity: 0;
+  translate: 0 -4px;
+  transition: opacity 0.2s, translate 0.2s;
+}
+.person:hover .person-cancel,
+.person:focus-visible .person-cancel {
+  opacity: 1;
+  translate: 0 0;
+}
+.person:hover {
+  background: rgba(229, 56, 59, 0.16);
+}
+@media (hover: none) {
+  .person-cancel {
+    opacity: 0.75;
+    translate: 0 0;
   }
 }

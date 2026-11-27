@@ -7,6 +7,7 @@ Landing stranica za prijavu na božićni domjenak — **četvrtak, 10. prosinca 
 - Djed Božićnjak doleti saonicama, viče „Ho ho ho!”, pokupi osobu u saonice i odleti, a zatim se prikaže poruka „Vidimo se na božićnom domjenku!”.
 - Stranica **/popis** („Tko dolazi?”) prikazuje sve prijavljene, ukupan broj i tko se još nije javio. Gumb je uvijek gore desno.
 - Tko nije na popisu, može upisati ime i prezime ručno.
+- Dolazak se može otkazati klikom na svoje ime na popisu (ili „Ipak ne mogu doći” na početnoj) — uz poruku „Žao nam je!”.
 
 ## Pokretanje lokalno
 

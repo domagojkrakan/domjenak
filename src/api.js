@@ -38,3 +38,10 @@ export function daysUntil(date = EVENT_DATE) {
 export function firstName(name) {
   return name.split(' ')[0];
 }
+
+export async function cancelRsvp(slug) {
+  const r = await fetch(`/api/rsvp?slug=${encodeURIComponent(slug)}`, { method: 'DELETE' });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || 'Otkazivanje nije uspjelo. Pokušaj ponovno.');
+  return data;
+}

@@ -47,4 +47,4 @@ npm run people
 
 - Pjesma je u `public/audio/bozicna.m4a` (uvod je skraćen na ~8 s, s fade-inom) i vrti se u krug. Zvonce gore desno je utišava i pali.
 - Djed ušeće u ekran, zagrijava se dok traje uvod, a od 0:08 repa. Usta mu prate vokal (`src/rapEnvelope.js`, izračunato iz snimke), glava ritam (~90 BPM), a dijelovi pjesme (strofe, refreni) su u `src/rap.js`.
-- Na refrenu (1:12 i 2:43) slijeva se dokotrlja Baba Mraz u kolicima i pjeva refren; dok Djed repa dalje, ona ostaje i đuska.
+- Baba Mraz se u kolicima dokotrlja slijeva već na ~0:14 i sprda Djeda, pjeva refren (1:12 i 2:43), a dok Djed repa dalje, đuska i komentira.

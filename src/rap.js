@@ -37,6 +37,7 @@ export function vocalAt(t) {
 export const WARMUP_LINES = ['Mic check… 1, 2 🎤', 'Ej, Zadar! 👋', 'Zagrijavam se… 🧣', 'Sobovi, dajte beat! 🦌', 'Jel se čujem? 🎧', 'Spreman sam! 🔥'];
 
 export const HOOK_START = barStart(27);
+export const BABA_ENTERS = barStart(5); // Baba dolazi rano da sprda Djeda
 
 // Djed komentira dok Baba pjeva refren.
 export const SANTA_JOKES = [
@@ -67,6 +68,16 @@ export const BABA_JOKES = [
   'Gdje je after party? 🎉',
   'Prijavite se, da ne plešem sama! 💃',
   'Pogledajte ovaj okret! 🌀',
+  'Djede, to nije rap, to je čitanje popisa 📜',
+  'Brada ti je na playbacku 🎙️',
+  'Sobovi traže da ih ne spominješ 🦌',
+  'Ajde, pjevaj, ja snimam… za ucjenu 📱',
+  'Ove godine šibu dobivaš ti 🪵',
+  'Zadnji hit mu je bio 1824. 🕰️',
+  'Zbog ovoga ljudi zatvaraju dimnjake 🏠',
+  'Tko je Djedu rekao da zna repat?',
+  'Stari, dišeš li? 😮‍💨',
+  'Ja ću refren, ti se odmori 😇',
 ];
 
 // Poruka za takt: svaka 2 takta nova, vidi se takt i pol pa kratka pauza.

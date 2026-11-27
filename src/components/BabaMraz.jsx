@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { audio } from '../music.js';
-import { BABA_JOKES, HOOK_START, beatAt, jokeAt, sectionAt, vocalAt } from '../rap.js';
+import { BABA_ENTERS, BABA_JOKES, beatAt, jokeAt, sectionAt, vocalAt } from '../rap.js';
 
 const ROLL = 2.6; // sekunde dok se dokotrlja
-const ENTER_AT = HOOK_START - ROLL - 0.3; // stigne točno kad krene refren
+const ENTER_AT = BABA_ENTERS;
 
-// Baba Mraz, reperica u kolicima: dokotrlja se slijeva pred prvi refren, pjeva refren,
-// a dok Djed repa dalje — ostaje, đuska, kima glavom i vrti se u kolicima.
+// Baba Mraz, reperica u kolicima: dokotrlja se slijeva rano u prvoj strofi i sprda Djeda,
+// pjeva refren, a dok Djed repa dalje — đuska, kima glavom, vrti se u kolicima i dalje ga sprda.
 export default function BabaMraz() {
   const parts = useRef({});
   const r = (name) => (el) => (parts.current[name] = el);
@@ -57,6 +57,7 @@ export default function BabaMraz() {
         wheel += (inside ? 1 : -1) * 260 * dt;
         body = -4;
         armFree = 85 + Math.sin(clock * 8) * 20; // maše dok ulazi
+        if (inside) line = 'Makni se, stari, stižem! 💨';
       } else if (!inside) {
         // izvan ekrana
       } else if (sec === 'hook') {
@@ -92,7 +93,7 @@ export default function BabaMraz() {
         headY = hit * 2;
         line = 'Ne kasnite na domjenak! 💃';
       }
-      say(inside && !moving ? line : '');
+      say(inside ? line : '');
 
       amp += (target - amp) * 0.45;
       if (p.mouth) p.mouth.style.transform = `scaleY(${0.12 + amp * 0.95})`;

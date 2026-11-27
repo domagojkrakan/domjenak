@@ -1,22 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { audio, playMusic, useMusic } from '../music.js';
-import {
-  BAR,
-  HOOK_LINES,
-  RAP_LINES,
-  WARMUP_LINES,
-  beatAt,
-  parseLrc,
-  sectionAt,
-  vocalAt,
-} from '../rap.js';
+import { WARMUP_LINES, beatAt, sectionAt, vocalAt } from '../rap.js';
 
 const WALK_MS = 5200;
-const MAX_WORDS = 14;
 const rot = (el, deg) => el && (el.style.transform = `rotate(${deg}deg)`);
 
 // Reper Djed Božićnjak: ušeće s desne strane, zagrijava se dok traje uvod,
-// a kad krene vokal repa po pjesmi — usta prate vokal, glava ritam, a riječi izlijeću iz njega.
+// a kad krene vokal repa po pjesmi — usta prate vokal, glava i ruke ritam.
+// Na refrenu pjeva Baba Mraz, a Djed đuska zatvorenih usta.
 export default function RapSanta() {
   const { muted, playing } = useMusic();
   const live = playing && !muted;
@@ -25,18 +16,8 @@ export default function RapSanta() {
   const [arrived, setArrived] = useState(reduced);
   const [walking, setWalking] = useState(false);
   const [bubble, setBubble] = useState('');
-  const [words, setWords] = useState([]);
-  const lyrics = useRef([]);
   const parts = useRef({});
   const r = (name) => (el) => (parts.current[name] = el);
-
-  // stihovi (ako ih netko upiše u .lrc)
-  useEffect(() => {
-    fetch('/audio/bozicna.lrc')
-      .then((res) => (res.ok ? res.text() : ''))
-      .then((txt) => (lyrics.current = parseLrc(txt).filter((l) => l.text)))
-      .catch(() => {});
-  }, []);
 
   // ulazak u ekran
   useEffect(() => {
@@ -55,8 +36,6 @@ export default function RapSanta() {
     let raf;
     let amp = 0;
     let lastBubble = '';
-    let lastSpawn = '';
-    let wid = 0;
     const t0 = performance.now();
 
     const say = (txt) => {
@@ -65,35 +44,6 @@ export default function RapSanta() {
         setBubble(txt);
       }
     };
-    const spawn = (key, text) => {
-      if (key === lastSpawn || !text) return;
-      lastSpawn = key;
-      const id = ++wid;
-      const w = {
-        id,
-        text,
-        dx: -(70 + Math.random() * 150),
-        dy: -(70 + Math.random() * 120),
-        rot: Math.random() * 30 - 18,
-        hue: Math.floor(Math.random() * 4),
-      };
-      setWords((ws) => [...ws.slice(-(MAX_WORDS - 1)), w]);
-      setTimeout(() => setWords((ws) => ws.filter((x) => x.id !== id)), 2600);
-    };
-
-    // tekst za takt: stih iz .lrc ako postoji, inače upadica
-    const lineFor = (t, bar, list) => {
-      const ls = lyrics.current;
-      for (let i = ls.length - 1; i >= 0; i--) {
-        if (ls[i].t <= t) {
-          const end = Math.min(ls[i + 1]?.t ?? Infinity, ls[i].t + BAR * 1.5);
-          if (t < end) return { text: ls[i].text, from: ls[i].t, dur: end - ls[i].t, key: `l${i}` };
-          break;
-        }
-      }
-      return null;
-    };
-
     const tick = () => {
       raf = requestAnimationFrame(tick);
       const p = parts.current;
@@ -137,29 +87,14 @@ export default function RapSanta() {
           armFree = (beat % 2 ? -100 : -45) + hit * 18;
           armMic = -hit * 4;
           say('');
-          const line = lineFor(t, bar);
-          const text = line ? line.text : RAP_LINES[bar % RAP_LINES.length];
-          const from = line ? line.from : bar * BAR + 0.175;
-          const dur = line ? line.dur : BAR;
-          const list = text.split(/\s+/);
-          const wi = Math.min(list.length - 1, Math.floor(((t - from) / dur) * list.length));
-          if (wi >= 0) spawn(`${line ? line.key : 'b' + bar}-${wi}`, list[wi]);
         } else if (sec === 'hook') {
-          target = vocalAt(t) * 0.8;
+          // refren pjeva Baba Mraz — Djed samo đuska
           const sway = Math.sin((beat + phase) * Math.PI * 0.5);
           torso = sway * 6;
           head = sway * 6;
-          headY = hit * 3;
+          headY = hit * 4;
           armFree = -140 + Math.sin((beat + phase) * Math.PI) * 22;
           say('');
-          const line = lineFor(t, bar);
-          if (line) {
-            const list = line.text.split(/\s+/);
-            const wi = Math.min(list.length - 1, Math.floor(((t - line.from) / line.dur) * list.length));
-            if (wi >= 0) spawn(`${line.key}-${wi}`, list[wi]);
-          } else if (beat % 4 === 0) {
-            spawn(`h${beat}`, HOOK_LINES[(beat / 4) % HOOK_LINES.length]);
-          }
         } else {
           // outro: mahanje
           armFree = -150 + Math.sin(clock * 9) * 16;
@@ -190,18 +125,6 @@ export default function RapSanta() {
       className={`rap-santa ${walking ? 'walking' : ''} ${arrived ? 'arrived' : ''} ${live ? 'live' : ''}`}
       aria-hidden={!waiting}
     >
-      <div className="rap-words" aria-hidden="true">
-        {words.map((w) => (
-          <span
-            key={w.id}
-            className={`rap-word c${w.hue}`}
-            style={{ '--dx': `${w.dx}px`, '--dy': `${w.dy}px`, '--rot': `${w.rot}deg` }}
-          >
-            {w.text}
-          </span>
-        ))}
-      </div>
-
       {bubble &&
         (waiting ? (
           <button type="button" className="rap-bubble clickable" onClick={playMusic}>

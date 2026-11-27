@@ -1686,43 +1686,37 @@ h1 {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.07); }
 }
-.rap-words {
-  position: absolute;
-  left: 40%;
-  top: 36%;
-  width: 0;
-  height: 0;
+/* ---------- Baba Mraz u kolicima ---------- */
+.baba-mraz {
+  position: fixed;
+  left: clamp(4px, 3vw, 60px);
+  bottom: 2px;
+  z-index: 12;
+  width: clamp(150px, 18vw, 230px);
+  aspect-ratio: 240 / 270;
+  pointer-events: none;
+  transform: translateX(calc(-100% - 8vw));
+  transition: transform 2.6s cubic-bezier(0.25, 0.7, 0.3, 1);
 }
-.rap-word {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: clamp(18px, 2vw, 28px);
-  white-space: nowrap;
-  color: #fff;
-  -webkit-text-stroke: 1px rgba(90, 10, 25, 0.35);
-  text-shadow: 0 3px 0 rgba(120, 15, 35, 0.55), 0 0 14px rgba(255, 255, 255, 0.35);
-  animation: wordFly 2.5s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+.baba-mraz.in {
+  transform: translateX(0);
 }
-.rap-word.c1 { color: #FFE58A; }
-.rap-word.c2 { color: #A9CF3A; }
-.rap-word.c3 { color: #ff8fa0; }
-@keyframes wordFly {
-  0% { opacity: 0; transform: translate(0, 0) scale(0.3) rotate(0); }
-  12% { opacity: 1; transform: translate(calc(var(--dx) * 0.25), calc(var(--dy) * 0.3)) scale(1.15) rotate(calc(var(--rot) * 0.5)); }
-  70% { opacity: 1; }
-  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.9) rotate(var(--rot)); }
+.baba-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 10px 18px rgba(5, 10, 40, 0.45));
+}
+.bm-part {
+  transform-box: view-box;
 }
 @media (max-width: 720px) {
   .rap-santa { width: 96px; right: 2px; }
+  .baba-mraz { width: 116px; left: 0; }
   .cd-cell { width: 68px; }
   .countdown { gap: 9px; }
   .rap-bubble { font-size: 12px; padding: 7px 10px; }
-  .rap-word { font-size: 15px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .rap-santa { transform: none; }
-  .rap-words { display: none; }
 }

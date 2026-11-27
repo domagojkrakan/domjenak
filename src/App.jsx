@@ -6,6 +6,7 @@ import Ornaments from './components/Ornaments.jsx';
 import Logo from './components/Logo.jsx';
 import Music from './components/Music.jsx';
 import RapSanta from './components/RapSanta.jsx';
+import BabaMraz from './components/BabaMraz.jsx';
 import CancelDialog from './components/CancelDialog.jsx';
 import { AnimatePresence } from 'framer-motion';
 import Home from './pages/Home.jsx';
@@ -64,6 +65,7 @@ export default function App() {
       </div>
       <Ornaments />
       <RapSanta />
+      <BabaMraz />
 
       <nav className="topbar">
         <a
